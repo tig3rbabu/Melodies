@@ -1,0 +1,34 @@
+use_bpm 120
+
+witch = ring(59,62,64,59,62,64,59,62,64,67,66,64,62,59,62,66)
+timey = ring(1,1,6,1,1,6,1,1,1,1,1,1,0.5,0.5,0.5,0.5)
+
+##| 64,62,59
+##| 1,1,6
+
+live_loop :witchscastle do
+  with_fx :gverb, room: 50, release: 2, mix: 0.2, amp: 0.5 do
+    with_fx :slicer, phase: 0.5, wave: 0, mix: 1 do
+      with_fx :distortion, distort: 0.9, mix: 0.8 do
+        syn = :dsaw
+        oc = -12
+        16.times do
+          tick
+          synth syn, note: witch.look+oc, release: timey.look*2
+          sleep timey.look
+        end
+        gg = synth syn, note: 64+oc, note_slide: 1.5, sustain: 2
+        sleep 1
+        control gg, note: 62+oc
+        sleep 1
+        synth syn, note: 59+oc, release: 6
+        sleep 6
+      end
+    end
+  end
+end
+
+live_loop :kick do
+  sample :bd_haus, cutoff: 90, amp: 5
+  sleep 2
+end
