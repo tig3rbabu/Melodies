@@ -1,0 +1,15 @@
+use_bpm 120
+
+
+mel = ring(66,64,64,62,65,64,62,67,64,62,60)
+t = ring(2,0.5,0.5,10,2,1,2,3,4,2,11)
+
+
+live_loop :melody do
+  rrr = synth :dsaw, note: 66, sustain: 16
+  11.times do
+    tick
+    control rrr, note: mel.look
+    sleep t.look*0.5
+  end
+end
