@@ -1,0 +1,25 @@
+use_bpm 100
+
+mel1 = ring(57,57,57,64,62,64,60,62,65,64)
+mel2 = ring(57,57,57,64,62,64,60,62,60,59)
+mel3 = ring(57,59,55,57,59,55,57,60,59,nil)
+mel4 = ring(57,59,55,57,59,55,60,59,57,nil)
+
+t1 = ring(1,1,1,1,1,1,1.5,1.5,1,6)
+t2 = ring(1,1,1.5,1.5,1,1.5,1.5,1,5,1)
+
+
+live_loop :melody do
+  with_fx :echo, phase: 0.75, decay: 4, mix: 0.5 do
+    4.times do
+      tick(:i)
+      mel = ring(mel1,mel2,mel3,mel4).look(:i)
+      t = ring(t1,t1,t2,t2).look(:i)
+      10.times do
+        tick(:ii)
+        synth :pluck, note: mel.look(:ii)+0, release: 1
+        sleep t.look(:ii)*0.5
+      end
+    end
+  end
+end
