@@ -1,0 +1,38 @@
+use_bpm 140
+
+chno = ring(62,69,67,70)
+cht = ring(:major7,'m7',:major7,:major7)
+
+live_loop :chordsbestpart do
+  with_fx :slicer , phase: 3, wave: 0, mix: 1 do
+    tick
+    synth :beep, note: chord(chno.look-12, cht.look), sustain: 6, release: 0
+    sleep 8
+  end
+end
+
+vmel1 = ring(nil,62,64,66,62,62,64,66,64,62,64,66,62,59,62,65,64,64)
+vmel2 = ring(nil,62,64,66,62,62,64,66,64,62,64,66,62,69,67)
+tv1 = ring(6,1,1,2,12,1,1,2,12,1,1,2,12,1,1,1,1,6)
+tv2 = ring(6,1,1,2,12,1,1,2,12,1,1,2,4,2,16)
+premel1 = ring(nil,69,71,74,71,69,71,66,64,62,66,64)
+premel2 = ring(nil,69,71,74,71,69,71,66,64,62)
+premel3 = ring(nil,69,71,74,71,69,71,66,64,62,62,69,67)
+chmel1 = ring(nil,74,71,69,66,69,71,74,71,69,66,64,62,74,71,69,66,69,70,72,70,69,67,69,66)
+tch1 = ring(3,1,1,1,1,2,2,1,1,1,0.5,0.5,4,1,1,1,1,2,2,1,1,1,1,1,0)
+t1 = ring(2,1,1,1,1,1,1,2,1,1,2,2)
+t2 = ring(2,1,1,1,1,1,1,2,1,5)
+t3 = ring(2,1,1,1,1,1,1,2,1,1,2,2,16)
+
+live_loop :melody do
+  tick(:i)
+  mel = ring(vmel1,vmel2,premel1,premel2,premel3,chmel1,chmel1).look(:i)
+  t = ring(tv1,tv2,t1,t2,t3,tch1,tch1).look(:i)
+  f = knit(0.5,5,1,2).look(:i)
+  tick_reset(:ii)
+  mel.length.times do
+    tick(:ii)
+    synth :sine, note: mel.look(:ii), amp: 0.5, release: 2
+    sleep t.look(:ii)*f
+  end
+end
