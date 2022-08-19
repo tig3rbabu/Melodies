@@ -1,0 +1,48 @@
+use_bpm 300
+
+tunak = ring(65,65,65,65,62,65,65,65,65,62,65,65,65,65,69,64,64,62)
+ttun = [1,2,1,2,2,1,2,1,2,2,1,2,1,2,2,2,2,4]
+
+verse = ring(65,65,64,62,62,62,60,60,59,60,62,67,64,60,59,60,62,67,64,60,60,59,60,62)
+tv = [2,1,1,1,1,1,1,1,1,1,2,1,1,1.5,1.5,1,2,1,1,1,1,1,1,4]
+
+pre = ring(64,64,64,65,67,64,65,67,65)
+tp = [2,2,1,1,1,1,4,12,8]
+
+puts tp.sum
+
+live_loop :chorus do
+  sleep 1
+  mel = verse
+  tt = tv
+  with_fx :slicer, phase: 1, wave: 0, mix: 1 do
+    vox = synth :dsaw, note: 65, sustain: tt.sum, release: 0, note_slide: 0
+    tick_reset
+    tt.count.times do
+      tick
+      control vox, note: mel.look
+      sleep tt.ring.look
+    end
+  end
+end
+
+live_loop :tuntun do
+  ttun.count.times do
+    tick
+    ##| synth :dsaw, note: tunak.look
+    ##| synth :dsaw, note: tunak.look+7-12
+    sleep ttun.ring.look*0.5
+  end
+end
+
+live_loop :beat do
+  ff = 32
+  sample :loop_amen_full, beat_stretch: ff
+  sleep ff
+end
+
+live_loop :bass do
+  tick
+  synth :dsaw, note: ring(62,60,53,55).look-24, sustain: 8, release: 0
+  sleep 8
+end
