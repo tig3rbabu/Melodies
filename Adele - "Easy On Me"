@@ -1,0 +1,49 @@
+use_bpm 68
+
+vmel1 = ring(60,62,65,65,62,65,69,60,62,65,65,62,60,62,65,65,64,65,64,65,64,65,62)
+tv1 = [1,1,2,3,2,2,5,1,1,2,3,9,1,1,2,3,3,3,3,2,2,3,9]
+vmel2 = ring(60,62,65,65,62,65,69,60,62,65,65,62,60,62,65,65,64,65,64,65,64,65,64,65,64,65,69,69,67,69,67,69,67,70,69)
+tv2 = [1,1,2,3,2,2,5,1,1,2,3,9,1,1,2,3,3,3,3,2,2,3,3,3,3,2,2,3,3,3,3,2,2,6,6]
+chmel = ring(65,65,72,70,69,70,69,67,69,69,69,67,67,69,65,65,67,69,65,65,65,67,69,65,62,60)
+tch = [1,1,6,1,1,2,1,1,2,1,2,1,3,8,1,1,2,1,11,1,1,2,1,4,1,7]
+
+bass1 = ring(65,62,57,58)
+bass2 = ring(65,62,57,58,58,58)
+bass3 = ring(65,67,62,60)
+tb1a = [1,0]
+tb1b = [4,3]
+tb2a = [0.5]
+tb2b = [3.5]
+
+a = 0
+
+live_loop :bass do
+  d = 0
+  with_fx :slicer, phase: 0.25, wave: 0, mix: d, amp: 0.8 do
+    bass = [bass1,bass2,bass3][a]
+    ta = [tb1a,tb1a,tb2a][a]
+    tb = [tb1b,tb1b,tb2b][a]
+    tick_reset
+    bass.length.times do
+      tick
+      sleep ta.ring.look
+      synth :dsaw, note: bass.look-24, sustain: ta.ring.look+tb.ring.look-1+d, release: 0, detune: 0.3
+      synth :fm, note: bass.look-24, sustain: ta.ring.look+tb.ring.look-1+d, release: 0, detune: 0.3
+      sleep tb.ring.look
+    end
+  end
+end
+
+live_loop :melodius do
+  with_fx :echo, phase: 0.5, decay: 4, mix: 0.4 do
+    mel = [vmel1,vmel2,chmel][a]
+    tt = [tv1,tv2,tch][a]
+    tick_reset
+    mel.length.times do
+      tick
+      synth :dsaw, note: mel.look, release: 0.5
+      sleep tt.ring.look*0.25
+    end
+  end
+end
+
