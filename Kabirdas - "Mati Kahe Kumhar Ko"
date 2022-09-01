@@ -1,0 +1,40 @@
+use_bpm 105
+
+mel1 = ring(65,70,70,70,74,74,72,70,70,70,72,74,74,74,74,77,74,72,72)
+mel2 = ring(65,72,72,72,72,72,70,70,72,70,69,67,69,67,69,69,70,74,72,70,70)
+mel3 = ring(70,70,74,74,70,77,76,77,76,76,77,77,79,75,74,72,74,72,70,70)
+mel4 = ring(75,75,75,75,75,77,79,77,75,74,72,74,74,72,74,72,70,70)
+tm1 = [2,2,1,2,1,1,1,1,1,1,1,2,2,2,1,2,1,4,4]
+tm2 = [1,1,1,1,2,1,2,1,1,1,1,1,1,1,2,2,1,2,1,4,4]
+tm3 = [2,1,2,1,2,2,1,5,2,1,2,1,1,3,1,0.5,0.5,0.5,0.5,3]
+tm4 = [2,1,2,1,2,1,1,1,1,1,3,2,1,1,2,0.5,0.5,9]
+
+puts tm4.length
+
+
+live_loop :melody do
+  with_fx :gverb, room: 69, release: 2, mix: 0.2 do
+    with_fx :echo, phase: 0.75, decay: 4, mix: 0.0 do
+      tick(:i)
+      mel = [mel1,mel2,mel3,mel3,mel4].ring.look(:i)
+      timmy = [tm1,tm2,tm3,tm3,tm4].ring.look(:i)
+      tick_reset(:ii)
+      timmy.length.times do
+        tick(:ii)
+        synth :dtri, note: mel.look(:ii), depth: 5, release: 3, cutoff: 95
+        sleep timmy.look(:ii)*0.5
+      end
+    end
+  end
+end
+
+live_loop :bass do
+  bass = ring(70,65,68,63).tick
+  with_fx :gverb, room: 69, release: 2, mix: 0.2 do
+    with_fx :wobble, phase: 8, cutoff_max: 90, cutoff_min: 40, wave: 0, mix: 1 do
+      synth :fm, note: bass-24, attack: 4, release: 4
+      synth :dsaw, note: bass-36, attack: 4, release: 4
+      sleep 8
+    end
+  end
+end
