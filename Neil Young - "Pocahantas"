@@ -1,0 +1,83 @@
+use_bpm 105
+
+
+live_loop :metro do
+  sample :drum_cymbal_closed
+  sleep 1
+end
+
+chordy = ring(60,60,62,60,55,58,65,60,55,58,65,60)
+mod = knit(:major,2,:minor,1,:major,9)
+tch = [8,8,8,8,4,2,2,8,4,2,2,8]
+
+mel1 = ring(62,64,64,60,55,64,64,62,64,64,60,55,64)
+mel2 = ring(62,62,57,60,62,62,60,62,64,64,60,55,64)
+mel3 = ring(64,62,62,62,59,55,62,60,60,57,64)
+mel4 = ring(64,62,62,62,59,55,62,60,60,57,60)
+
+t1 = [1,2,1,3,1,2,6,1,2,1,3,1,9]
+t2 = [1,2,3,1,2,5,1,1,2,2,2,1,7]
+t3 = [1,1,2,1,1,6,1,1,2,2,14]
+t4 = [1,1,2,1,1,6,1,1,2,2,15]
+
+##| puts mel3.length
+
+live_loop :melody do
+  with_fx :flanger, mix: 1 do
+    tick(:i)
+    if look(:i)==0
+      sleep 7.5
+    else sleep 0
+    end
+    mel = ring(mel1,mel2,mel3,mel4).look(:i)
+    tt = ring(t1,t2,t3,t4).look(:i)
+    syn = synth :prophet, note: 60+12, sustain: tt.sum*0.5-4, release: 6
+    tick_reset(:ii)
+    tt.length.times do
+      tick(:ii)
+      control syn, note: mel.look(:ii)+12
+      sleep tt.ring.look(:ii)*0.5
+    end
+  end
+end
+
+live_loop :chprds do
+  tick(:i)
+  if look(:i)==0
+    1.times do
+      synth :zawa, note: chord(60,:major), sustain: tch.ring.look, release: 0, cutoff: 75
+      sleep 8
+    end
+  else
+    tick(:ii)
+    synth :zawa, note: chord(chordy.look(:ii),mod.look(:ii)), sustain: tch.ring.look(:ii)-2, release: 0, cutoff: 75
+    sleep tch.ring.look(:ii)
+  end
+end
+
+live_loop :bass do
+  tick(:i)
+  if look(:i)==0
+    1.times do
+      synth :dsaw, note: 60-36, sustain: tch.ring.look, release: 0, cutoff: 60
+      sleep 8
+    end
+  else
+    tick(:ii)
+    synth :dsaw, note: chordy.look(:ii)-36, sustain: tch.ring.look(:ii), release: 0, cutoff: 60
+    sleep tch.ring.look(:ii)
+  end
+end
+
+with_fx :gverb, room: 49, release: 1.5, mix: 0.3 do
+  live_loop :kick do
+    sample :bd_haus, cutoff: 90, amp: 1.5
+    sleep 2
+  end
+  
+  live_loop :snare do
+    sleep 2
+    sample :sn_dub, rate: 0.7, amp: 1.2
+    sleep 2
+  end
+end
