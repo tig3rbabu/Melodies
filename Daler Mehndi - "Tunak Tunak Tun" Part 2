@@ -1,0 +1,89 @@
+use_bpm 300
+
+tunak = ring(65,65,65,65,62,65,65,65,65,62,65,65,65,65,69,64,64,62)
+ttun = [1,2,1,2,2,1,2,1,2,2,1,2,1,2,2,2,2,4]
+
+verse = ring(65,65,64,62,62,62,60,60,59,60,62,67,64,60,59,60,62,67,64,60,60,59,60,62)
+tv = [2,1,1,1,1,1,1,1,1,1,2,1,1,1.5,1.5,1,2,1,1,1,1,1,1,4]
+
+pre = ring(64,64,65,67,65,64,66,67,65)
+tp = [2,1,1,0.5,0.5,1,1,15,9]
+
+bass1 = ring(62,60,53,55)
+bass2 = ring(62,60,58,60)
+
+puts tv.sum
+
+live_loop :chorus do
+  sleep 1
+  a = 1
+  mel = [verse, pre][a]
+  tt = [tv,tp][a]
+  with_fx :slicer, phase: 1, wave: 0, mix: 1 do
+    vox = synth :dsaw, note: 65+2, sustain: tt.sum, release: 0, note_slide: 0.5*a
+    tick_reset
+    tt.count.times do
+      tick
+      control vox, note: mel.look+(2*a)
+      sleep tt.ring.look
+    end
+  end
+end
+
+live_loop :tuntun do
+  ttun.count.times do
+    tick
+    synth :dsaw, note: tunak.look
+    synth :dsaw, note: tunak.look+7-12
+    sleep ttun.ring.look*0.5
+  end
+end
+
+
+live_loop :beat do
+  with_fx :lpf, cutoff: 120, cutoff_slide: 64, mix: 1 do |gg|
+    control gg, cutoff: 120
+    2.times do
+      ff = 32
+      sample :loop_amen_full, beat_stretch: ff
+      sleep ff
+    end
+  end
+end
+
+live_loop :bass do
+  bass = [bass1,bass2][0]
+  with_fx :lpf, cutoff: 120, cutoff_slide: 64, mix: 1 do |gg|
+    control gg, cutoff: 120
+    with_fx :slicer, phase: 0.5, wave: 0, mix: 0 do
+      with_fx :distortion, distort: 0.99, mix: 0.8, amp: 0.7 do
+        8.times do
+          tick
+          synth :dsaw, note: bass.look-24, sustain: 8, release: 0
+          synth :dsaw, note: bass.look-36, sustain: 8, release: 0
+          sleep 8
+        end
+      end
+    end
+  end
+end
+
+live_loop :beat2 do
+  sample :bd_haus, cutoff: 90, amp: 4
+  sleep ring(5,3).tick*1
+end
+
+live_loop :sane do
+  sleep 2
+  sample :sn_dub
+  sleep 2
+end
+
+live_loop :tickas do
+  16.times do
+    sample :drum_cymbal_closed, rate: 4
+    sleep 0.5
+  end
+end
+
+
