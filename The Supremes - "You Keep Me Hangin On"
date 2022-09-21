@@ -38,7 +38,7 @@ live_loop :bass do
           b = 0
           tick
           synth :dsaw, note: ring(59,57,61,55).look-24, sustain: a-b, release: 0, cutoff: 60
-          synth :dsaw, note: ring(59,57,61,55).look-36, sustain: a-b, release: 0, cutoff: 60
+          synth :dsaw, note: ring(59,57,61,55).look-12, sustain: a-b, release: 0, cutoff: 60
           sleep a
         end
       end
@@ -47,16 +47,17 @@ live_loop :bass do
 end
 
 live_loop :chord do
-  with_fx :gverb, room: 54, release: 1.5, mix: 0.4, amp: 1.2 do
-    with_fx :slicer, phase: 0.25, wave: 0, pulse_width: 0.75, mix: 0 do
-      with_fx :distortion, distort: 0.8, mix: 0, amp: 0.7 do
-        with_fx :wobble, phase: 7, cutoff_max: 90, cutoff_min: 40, mix: 0 do
-          a = 4
-          b = 0
-          tick
-          synth :dsaw, note: chord(ring(59,57,59,55).look+12,knit('9sus4',3,:major7,1).look, invert: ring(0,0,-1).look), sustain: a-b, release: 0, cutoff: 80
-          sleep a
-        end
+  sl = 64
+  with_fx :gverb, room: 54, release: 1.5, mix: 0.4, amp: 1 do
+    with_fx :lpf, cutoff: 60, cutoff_slide: sl, mix: 0 do |p|
+      control p, cutoff: 130
+      a = 4
+      b = 0
+      vv = sl/a
+      vv.times do
+        tick
+        synth :dsaw, note: chord(ring(59,57,59,55).look+0,knit('9sus4',2,'sus4',1,:major7,1).look, invert: ring(-1,0,0,0).look), sustain: a-b, release: 0, cutoff: 100
+        sleep a
       end
     end
   end
