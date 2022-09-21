@@ -23,21 +23,22 @@ live_loop :melody do
   with_fx :echo, phase: 0.75, decay: 6, mix: 0.7 do
     tt.length.times do
       tick(:ii)
-      synth :dsaw, note: mel.look(:ii), release: 0.75, amp: 1.5
+      synth :dsaw, note: mel.look(:ii), release: 0.75, amp: 1.6
       sleep tt.ring.look(:ii)*0.5
     end
   end
 end
 
 live_loop :bass do
-  with_fx :gverb, room: 54, release: 1.5, mix: 0.4, amp: 0.8 do
+  with_fx :gverb, room: 54, release: 1.5, mix: 0.4, amp: 1 do
     with_fx :slicer, phase: 2, wave: 1, pulse_width: 0.75, mix: 0 do
-      with_fx :distortion, distort: 0.8, mix: 0, amp: 0.7 do
+      with_fx :distortion, distort: 0.8, mix: 1, amp: 0.7 do
         with_fx :wobble, phase: 7, cutoff_max: 90, cutoff_min: 40, mix: 0 do
           a = 4
+          b = 1
           tick
-          synth :dsaw, note: ring(59,57,61,55).look-24, sustain: a-0, release: 0
-          synth :dsaw, note: ring(59,57,61,55).look-36, sustain: a-0, release: 0
+          synth :dsaw, note: ring(59,57,61,55).look-24, sustain: a-0, release: 0, cutoff: 60
+          synth :dsaw, note: ring(59,57,61,55).look-36, sustain: a-0, release: 0, cutoff: 60
           sleep a
         end
       end
@@ -46,7 +47,7 @@ live_loop :bass do
 end
 
 live_loop :beat  do
-  d = 16
+  d = 32
   sample :loop_amen_full, beat_stretch: d, amp: 2
   sleep d
 end
