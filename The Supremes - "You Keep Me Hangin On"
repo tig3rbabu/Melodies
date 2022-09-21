@@ -1,4 +1,4 @@
-use_bpm 120
+use_bpm 140
 
 
 mel1 = ring(59,59,59,59,59,57,57,61,61,61,61,61,62,59,59)
@@ -31,14 +31,30 @@ end
 
 live_loop :bass do
   with_fx :gverb, room: 54, release: 1.5, mix: 0.4, amp: 1 do
-    with_fx :slicer, phase: 2, wave: 1, pulse_width: 0.75, mix: 0 do
+    with_fx :slicer, phase: 0.25, wave: 0, pulse_width: 0.75, mix: 0 do
       with_fx :distortion, distort: 0.8, mix: 1, amp: 0.7 do
         with_fx :wobble, phase: 7, cutoff_max: 90, cutoff_min: 40, mix: 0 do
           a = 4
-          b = 1
+          b = 0
           tick
-          synth :dsaw, note: ring(59,57,61,55).look-24, sustain: a-0, release: 0, cutoff: 60
-          synth :dsaw, note: ring(59,57,61,55).look-36, sustain: a-0, release: 0, cutoff: 60
+          synth :dsaw, note: ring(59,57,61,55).look-24, sustain: a-b, release: 0, cutoff: 60
+          synth :dsaw, note: ring(59,57,61,55).look-36, sustain: a-b, release: 0, cutoff: 60
+          sleep a
+        end
+      end
+    end
+  end
+end
+
+live_loop :chord do
+  with_fx :gverb, room: 54, release: 1.5, mix: 0.4, amp: 1.2 do
+    with_fx :slicer, phase: 0.25, wave: 0, pulse_width: 0.75, mix: 0 do
+      with_fx :distortion, distort: 0.8, mix: 0, amp: 0.7 do
+        with_fx :wobble, phase: 7, cutoff_max: 90, cutoff_min: 40, mix: 0 do
+          a = 4
+          b = 0
+          tick
+          synth :dsaw, note: chord(ring(59,57,59,55).look+12,knit('9sus4',3,:major7,1).look, invert: ring(0,0,-1).look), sustain: a-b, release: 0, cutoff: 80
           sleep a
         end
       end
@@ -47,8 +63,8 @@ live_loop :bass do
 end
 
 live_loop :beat  do
-  d = 32
-  sample :loop_amen_full, beat_stretch: d, amp: 2
+  d = 8
+  ##| sample :loop_breakbeat, beat_stretch: d, amp: 5
   sleep d
 end
 
