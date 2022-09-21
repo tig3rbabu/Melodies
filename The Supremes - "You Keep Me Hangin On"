@@ -1,0 +1,53 @@
+use_bpm 120
+
+
+mel1 = ring(59,59,59,59,59,57,57,61,61,61,61,61,62,59,59)
+mel2 = ring(59,59,59,59,59,59.6,59,57,57,54,54,57,61,61,61,59,59,57,55)
+mel3 = ring(59,59,57,59,59.6,59,57,57,59,54,61,61,61,59,57,55)
+tm1 = [1,1,2,1,2,1,7,1,1,1,2,1,2,1,7]
+tm2 = [1,1,2,1,1,1,1,1,1,2,1,2,2,2,2,1,2,1,8]
+tm3 = [1,2,1,1,1,1,1,1,6,1,2,1,2,2,1,8]
+
+
+
+live_loop :melody do
+  tick(:i)
+  if look(:i)==0
+    sleep 1
+  else
+    sleep 0
+  end
+  mel = [mel1,mel2,mel3].ring.look(:i)
+  tt = [tm1,tm2,tm3].ring.look(:i)
+  tick_reset(:ii)
+  with_fx :echo, phase: 0.75, decay: 6, mix: 0.7 do
+    tt.length.times do
+      tick(:ii)
+      synth :dsaw, note: mel.look(:ii), release: 0.75, amp: 1.5
+      sleep tt.ring.look(:ii)*0.5
+    end
+  end
+end
+
+live_loop :bass do
+  with_fx :gverb, room: 54, release: 1.5, mix: 0.4, amp: 0.8 do
+    with_fx :slicer, phase: 2, wave: 1, pulse_width: 0.75, mix: 0 do
+      with_fx :distortion, distort: 0.8, mix: 0, amp: 0.7 do
+        with_fx :wobble, phase: 7, cutoff_max: 90, cutoff_min: 40, mix: 0 do
+          a = 4
+          tick
+          synth :dsaw, note: ring(59,57,61,55).look-24, sustain: a-0, release: 0
+          synth :dsaw, note: ring(59,57,61,55).look-36, sustain: a-0, release: 0
+          sleep a
+        end
+      end
+    end
+  end
+end
+
+live_loop :beat  do
+  d = 16
+  sample :loop_amen_full, beat_stretch: d, amp: 2
+  sleep d
+end
+
