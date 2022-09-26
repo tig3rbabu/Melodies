@@ -1,0 +1,35 @@
+use_bpm 140
+
+
+mel1 = ring(65,68,67,63,68,67,60,68,67,56,53,56,60,63)
+mel2 = ring(65,68,67,63,61,60,61,60,56,55,56,60,53,53,56,60,63)
+tm1 = [12,2,1,13,2,1,13,2,1,15,0.5,0.5,0.5,0.5]
+tm2 = [12,2,1,16,0.5,0.5,2,1,7,2,2,1,15,0.5,0.5,0.5,0.5]
+
+puts tm2.sum
+
+a = 0
+
+live_loop :melody do
+  mel = [mel1,mel2][a]
+  tt = [tm1,tm2][a]
+  tick_reset
+  with_fx :echo, phase: 1, decay: 8, mix: 0.8 do
+    tt.length.times do
+      tick
+      synth :piano, note: mel.look+12
+      sleep tt.ring.look*0.5
+    end
+  end
+end
+
+
+live_loop :bass do
+  with_fx :gverb, room: 69, release: 1.5, mix: 0.15 do
+    tb = [4,4,8]
+    tick
+    synth :sine, note: ring(61,58,53).look-0, sustain: 0, release: 0.75, cutoff: 120
+    synth :dsaw, note: ring(61,58,53).look-24, sustain: tb.ring.look*1, release: 0, cutoff: 60
+    sleep tb.ring.look*1
+  end
+end
