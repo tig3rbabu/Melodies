@@ -1,0 +1,64 @@
+use_bpm 110
+
+mel1 = ring(68,65,66,68,68,66,65,65,65,66,66,65,63,61)
+mel2 = ring(68,68,66,65,65,65,66,68,68,66,65,65,66,66,65,66,66,65,63,61,65,58)
+mel3 = ring(56,65,68,66,65,63,61,65,66,65,63,61,65,58)
+mel4 = ring(56,65,68,66,65,63,61,61,61,63,65,61,63,61)
+tm1 = [3,1,1,2,1.5,0.5,10,0.5,0.5,1.5,1.5,0.5,1,6.5]
+tm2 = [1,1.5,0.5,3,0.5,0.5,1,1,1.5,0.5,5,1,0.5,2.5,1,1.5,1.5,1,1,4,2,1]
+tm3 = [7,1,5,0.5,1,0.5,4,2,1.5,0.5,2,4,2,1]
+tm4 = [7,1,5,0.5,1,0.5,3.5,0.5,0.5,0.5,2,1,2,7]
+
+puts tm4.sum
+
+live_loop :melody do
+  tick(:i)
+  mel = [mel1,mel2,mel3,mel4].ring.look(:i)
+  tt = [tm1,tm2,tm3,tm4].ring.look(:i)
+  tick_reset(:ii)
+  with_fx :echo, phase: 0.75, decay: 4, mix: 0.6 do
+    tt.length.times do
+      tick(:ii)
+      synth :dsaw, note: mel.look(:ii), release: 0.75
+      ##| synth :organ_tonewheel, note: mel.look(:ii)+12, amp: 2
+      sleep tt.ring.look(:ii)*0.5
+    end
+  end
+end
+
+live_loop :bass do
+  with_fx :slicer, phase: 0.5, wave: 0, mix: 0 do
+    tick
+    synth :fm, note: ring(61,58,59,54).look-12, release: 4, depth: 2
+    ##| synth :dsaw, note: ring(61,58,59,54).look-24, sustain: 4, release: 0, cutoff: 85
+    ##| synth :dsaw, note: ring(61,58,59,54).look-24, sustain: 4, release: 0, cutoff: 105, detune: 0.25
+    sleep 4
+  end
+end
+
+
+live_loop :beat do
+  with_fx :gverb, room: 69, release: 1.5, mix: 0.2 do
+    sample :bd_haus, amp: 3, cutoff: 90
+    sleep 1
+  end
+end
+
+live_loop :backbeat do
+  with_fx :gverb, room: 69, release: 1.5, mix: 0.2 do
+    sleep 1
+    ##| sample :sn_dub, amp: 1.5, cutoff: 110
+    sleep 1
+  end
+end
+
+live_loop :hhat do
+  16.times do
+    ##| sample :drum_cymbal_closed, rate: 2 if spread(12,16).tick
+    ##| sample :drum_cymbal_pedal, rate: 1.5 if spread(5,16).tick(:i)
+    sleep 0.25
+  end
+end
+
+
+
