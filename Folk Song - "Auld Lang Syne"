@@ -1,0 +1,37 @@
+use_bpm 100
+
+mel1 = ring(60,65,64,65,69,67,65,67,69,67,65,65,69,72,74)
+mel2 = ring(74,72,69,69,65,67,65,67,69,67,65,62,62,60,65)
+mel3 = ring(74,72,69,69,65,67,65,67,74,72,69,69,72,74)
+tm1 = [2,3,1,2,2,3,1,2,1,1,3,1,2,2,6]
+tm3 = [2,3,1,2,2,3,1,2,2,3,1,2,2,6]
+
+live_loop :melody do
+  tick(:i)
+  mel = [mel1,mel2,mel3,mel2].ring.look(:i)
+  tt = [tm1,tm1,tm3,tm1].ring.look(:i)
+  tick_reset(:ii)
+  with_fx :echo, phase: 0.75, decay: 6, mix: 0.6 do
+    tt.length.times do
+      tick(:ii)
+      synth :dtri, note: mel.look(:ii)+12, release: 0.666, cutoff: 95, detune: 0.2
+      sleep tt.ring.look(:ii)*0.5
+    end
+  end
+end
+
+live_loop :bass do
+  tick
+  if look==0
+    sleep 1
+  else
+    sleep 0
+  end
+  ff = 4
+  synth :fm, note: ring(65,67,63,70,65,67,60,65).look-24, sustain: ff, release: 0
+  synth :dsaw, note: ring(65,67,63,70,65,67,60,65).look-36, sustain: ff, release: 0, cutoff: 60
+  with_fx :gverb, room: 69, release: 1.5, mix: 0.15 do
+    synth :organ_tonewheel, note: chord(ring(65,67,63,70,65,67,60,65).look-0,ring('5','m7',:major7,'5',:major7,'m7','9sus4','5').look), sustain: ff, release: 0, amp: 3
+  end
+  sleep ff
+end
