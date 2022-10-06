@@ -1,0 +1,62 @@
+use_bpm 140
+
+ch1 = ring(50,57)
+ch2 = ring(50,52,53,55,48,57,62)
+ch3 = ring(57,60,55,62,57,60,57,60,55,62,57,57)
+ff1 = ring('m7')
+ff2 = ring('m7','m7',:major7,'11',:major7,'m7','m7')
+ff3 = knit(:major,11,'7',1)
+tc1 = [8]
+tc2 = [8,8,4,4,8,4,4]
+tc3 = [4,4,4,4,4,4,4,4,4,4,8,8]
+
+
+mel1 = ring(69,67,69,67,69,71,69,67,64,62,60,62,64,62,60,62,62,60)
+mel2 = ring(64,64,64,60,62,62,62,60,62,64,62,62,62,62,62,60,62,64,61,61,61,60)
+mel3 = ring(64,64,64,60,62,62,62,60,62,64,62,62,62,62,62,60,62,64,61,61,61,61,61,61,61,69)
+tm1 = [1,1,10,2,2,2,4,6,2,2,2,1,3,2,1,1,4,2+16+16]
+tm2 = [1,1,2,2,1,1,1,1,2,4,2,2,4,1,1,1,1,2,2,2,2,4+8]
+tm3 = [1,1,2,2,1,1,1,1,2,4,2,2,4,1,1,1,1,2,2,2,2,2,2,2,2,4+16]
+
+puts tm3.sum
+
+live_loop :melody do
+  tick(:i)
+  if look(:i)==0
+    sleep 1
+  else
+    sleep 0
+  end
+  mel = [mel2,mel3].ring.look(:i)
+  tt = [tm2,tm3].ring.look(:i)
+  tick_reset(:ii)
+  tt.length.times do
+    tick(:ii)
+    with_fx :echo, phase: 0.75, decay: 6, mix: 0.8 do
+      synth :dsaw, note: mel.look(:ii)
+      sleep tt.look(:ii)*0.5
+    end
+  end
+end
+
+a = 2
+
+live_loop :choruschords do
+  chords = [ch1,ch2,ch3][a]
+  tc = [tc1,tc2,tc3][a]
+  ff = [ff1,ff2,ff3][a]
+  tick_reset
+  tc.length.times do
+    tick
+    synth :piano, note: chord(chords.look+0,ff.look), release: tc.ring.look
+    synth :dsaw, note: chord(chords.look+0,ff.look), sustain: tc.ring.look, release: 0, cutoff: 80
+    sleep tc.ring.look
+  end
+end
+
+live_loop :hhats do
+  sample :drum_cymbal_closed
+  sleep 0.5
+  sample :drum_cymbal_closed, start: 0.2
+  sleep 0.5
+end
