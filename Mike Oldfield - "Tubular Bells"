@@ -1,0 +1,56 @@
+use_bpm 140
+
+
+exor1 = ring(64,69,64,71,64,67,69,64,72,64,74,64,69,71)
+exor1b = ring(false,true,false,true,false,true,true,false,true,false,true,false,true,true)
+exor2 = ring(64,67)
+exor2b = ring(false,true)
+
+bass = ring(57,57,57,57,60,62,64,62,67,55,55,60,59,60,59,55)
+tb = [2,4,3,0.5,0.5,1,1,1,1,2,4,4,2,1,1,2]
+
+puts tb.sum
+
+live_loop :bass do
+  tick
+  if look==0
+    sleep 0.5
+  else
+    sleep 0
+  end
+  tb.length.times do
+    ##| synth :fm, note: bass.look-12, release: 0.75, depth: 2
+    sleep tb.ring.look*0.5
+  end
+end
+
+live_loop :mainriff do
+  tick(:i)
+  ex = [exor1,exor1,exor2].ring.look(:i)
+  exb = [exor1b,exor1b,exor2b].ring.look(:i)
+  tick_reset(:ii)
+  with_fx :gverb, room: 59, release: 2, mix: 0.2 do
+    ex.length.times do
+      tick(:ii)
+      synth :piano, note: ex.look(:ii)+12
+      ##| synth :dtri, note: ex.look(:ii)+24, sustain: 0, amp: 0.8, release: 0.75 if exb.look(:ii)
+      ##| sample :perc_bell, rate: 2 if exb.look(:ii)
+      sleep 0.5
+    end
+  end
+end
+
+live_loop :drone do
+  ##| synth :organ_tonewheel, note: chord(69+12,'5'), sustain: 15
+  sleep 15
+end
+
+live_loop :stab do
+  d = 2.5
+  sleep d
+  with_fx :gverb, room: 59, release: 8, mix: 0.3 do
+    ##| synth :organ_tonewheel, note: chord(69+36,:minor), sustain: 0.0, release: 0.75, amp: 5
+    ##| synth :organ_tonewheel, note: chord(69+12,:minor), sustain: 0.0, release: 0.75, amp: 5
+  end
+  sleep 15-d
+end
