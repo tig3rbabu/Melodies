@@ -12,15 +12,18 @@ tb = [2,4,3,0.5,0.5,1,1,1,1,2,4,4,2,1,1,2]
 puts tb.sum
 
 live_loop :bass do
-  tick
-  if look==0
+  tick(:i)
+  if look(:i)==0
     sleep 0.5
   else
     sleep 0
   end
   tb.length.times do
-    ##| synth :fm, note: bass.look-12, release: 0.75, depth: 2
-    sleep tb.ring.look*0.5
+    tick(:ii)
+    synth :dsaw, note: bass.look(:ii)-24, release: tb.ring.look(:ii)*0.5, detune: 0.3
+    synth :dtri, note: bass.look(:ii)-12, sustain: tb.ring.look(:ii)*0.5, release: 0, depth: 2
+    synth :fm, note: bass.look(:ii)-12, release: tb.ring.look(:ii)*0.5, depth: 2
+    sleep tb.ring.look(:ii)*0.5
   end
 end
 
@@ -33,15 +36,18 @@ live_loop :mainriff do
     ex.length.times do
       tick(:ii)
       synth :piano, note: ex.look(:ii)+12
-      ##| synth :dtri, note: ex.look(:ii)+24, sustain: 0, amp: 0.8, release: 0.75 if exb.look(:ii)
-      ##| sample :perc_bell, rate: 2 if exb.look(:ii)
+      synth :dtri, note: ex.look(:ii)+24, sustain: 0, amp: 0.5, release: 0.75 if exb.look(:ii)
+      sample :perc_bell, rate: 2 if exb.look(:ii)
       sleep 0.5
     end
   end
 end
 
 live_loop :drone do
-  ##| synth :organ_tonewheel, note: chord(69+12,'5'), sustain: 15
+  synth :organ_tonewheel, note: chord(69+12,'5'), sustain: 15
+  with_fx :wobble, phase: 18, cutoff_max: 90, cutoff_min: 50, wave: 0, mix: 1, amp: 1.5 do
+    ##| synth :dsaw, note: chord(69-12,'5'), attack: 8, release: 10
+  end
   sleep 15
 end
 
@@ -49,8 +55,8 @@ live_loop :stab do
   d = 2.5
   sleep d
   with_fx :gverb, room: 59, release: 8, mix: 0.3 do
-    ##| synth :organ_tonewheel, note: chord(69+36,:minor), sustain: 0.0, release: 0.75, amp: 5
-    ##| synth :organ_tonewheel, note: chord(69+12,:minor), sustain: 0.0, release: 0.75, amp: 5
+    synth :organ_tonewheel, note: chord(69+36,:minor), sustain: 0.0, release: 0.75, amp: 5
+    synth :organ_tonewheel, note: chord(69+12,:minor), sustain: 0.0, release: 0.75, amp: 5
   end
   sleep 15-d
 end
