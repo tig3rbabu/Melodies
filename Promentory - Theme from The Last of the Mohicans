@@ -1,0 +1,62 @@
+use_bpm 115
+
+mel1 = ring(57,57,57,65,64,62,64,62,60,62,60,57)
+mel2 = ring(60,60,60,64,62,64,67,64,64,64,62,64)
+mel3 = ring(65,65,65,65,65,65,67,65,65,65,64,62)
+mel4 = ring(64,64,64,64,64,64,67,64,64,64,62,60)
+mel5 = ring(62,62,62,62,62,62,65,64,62,57,62,62)
+mel6 = ring(62,62,62,62,60,62,65,64,62,64,62,60)
+
+highpart = ring(65,64,62,57,65,64,64,67,65,69,65,64,64,67,64,62)
+th1 = [5,1.5,1.5,5,1.5,1.5,1.5,6.5+8,1.5,3.5,1.5,1.5,1.5,5,1.5,16]
+
+puts th1.sum
+
+tm1 = [0.4444,0.2222,1-0.6666,0.3333,0.3333,1-0.6666,0.3333,0.3333,1-0.6666,0.3333,0.3333,1-0.6666]
+tm2 = [0.4444,0.2222,1-0.6666,0.4444,0.2222,1-0.6666,0.3333,0.3333,1-0.6666,0.3333,0.3333,1-0.6666]
+
+
+live_loop :hhoart do
+  tick
+  synth :dsaw, note: highpart.look+24, sustain: th1.ring.look*0.5, release: 0, amp: 0.8
+  sleep th1.ring.look*0.5
+end
+
+live_loop :violins do
+  tick(:i)
+  mel = [mel1,mel1,mel2,mel2,mel3,mel4,mel5,mel6].ring.look(:i)
+  tt = [tm1,tm1,tm1,tm1,tm2,tm2,tm1,tm1].ring.look(:i)
+  with_fx :gverb, room: 69, release: 6, mix: 0.2, amp: 0.8 do
+    mel.length.times do
+      tick(:ii)
+      synth :dsaw, note: mel.look(:ii)+12, attack: 0.1111, sustain: 0.2222, release: 0.12
+      sleep tt.ring.look(:ii)
+    end
+  end
+end
+
+live_loop :bass do
+  h = 36
+  kk = [16,16,8,8,16]
+  cel = synth :dsaw, note: 62-h, attack: 4, sustain: (kk.sum*0.5)-8, release: 6, cutoff: 60
+  cel2 = synth :dsaw, note: 62+12-h, attack: 4, sustain: (kk.sum*0.5)-8, release: 6, cutoff: 60
+  tick_reset
+  kk.length.times do
+    tick
+    control cel, note: ring(62,60,65,60,62).look-h
+    control cel2, note: ring(62,60,65,60,62).look-h+12
+    sleep kk.ring.look*0.5
+  end
+end
+
+live_loop :drone do
+  synth :dsaw, note: 69, attack: 8, sustain: 16, release: 10, amp: 0.6
+  sleep 32
+end
+
+live_loop :bd do
+  with_fx :gverb, room: 69, release: 6, mix: 0.3 do
+    sample :bd_haus, amp: 2, cutoff: 90
+    sleep 4
+  end
+end
