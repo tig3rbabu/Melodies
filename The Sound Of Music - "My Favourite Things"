@@ -20,35 +20,41 @@ live_loop :melody do
     mel = [mel1,mel1,mel2,mel3].ring.look(:i)
     tt = [tm1,tm1,tm2,tm3].ring.look(:i)
     tick_reset(:ii)
-    tt.length.times do
-      tick(:ii)
-      synth :prophet, note: mel.look(:ii)+12, release: 1.5, cutoff: 100, amp: 0.8
-      sleep tt.ring.look(:ii)
+    with_fx :echo, phase: 0.75, decay: 6, mix: 0.7 do
+      tt.length.times do
+        tick(:ii)
+        synth :dsaw, note: mel.look(:ii)+0, release: 0.75, cutoff: 100, amp: 0.8
+        sleep tt.ring.look(:ii)
+      end
     end
   end
 end
 
 live_loop :chords do
-  with_fx :slicer, phase: 0.5, wave: 0, mix: 0 do
+  with_fx :gverb, room: 69, release: 2, mix: 0.3 do
     tick
     synth :organ_tonewheel, note: chord(bass.look, chona.look)+0, sustain: tch.ring.look, release: 0, amp: 5
+    ##| synth :zawa, note: chord(bass.look, chona.look)+0, sustain: tch.ring.look, release: 0, amp: 1, cutoff: 85, range: 12
     sleep tch.ring.look
   end
 end
 
 live_loop :bass do
-  with_fx :slicer, phase: 0.25, wave: 0, mix: 1 do
-    tick
-    synth :dsaw, note: bass.look-24, sustain: tch.ring.look, release: 0, amp: 1
-    synth :dsaw, note: bass.look-12, sustain: tch.ring.look, release: 0, amp: 1
-    sleep tch.ring.look
+  with_fx :gverb, room: 69, release: 2, mix: 0.2, amp: 0.8 do
+    with_fx :wobble, phase: 12, cutoff_max: 90, cutoff_min: 40, mix: 1 do
+      ##| with_fx :slicer, phase: 0.75, wave: 0, mix: 0 do
+      tick
+      ##| synth :fm, note: bass.look-12, sustain: tch.ring.look, release: 0, amp: 1
+      synth :dsaw, note: bass.look-24, sustain: tch.ring.look, release: 0, amp: 1
+      synth :dsaw, note: bass.look-36, sustain: tch.ring.look, release: 0, amp: 1
+      sleep tch.ring.look
+    end
   end
 end
 
 live_loop :beat do
-  sample :bd_boom
+  ##| sample :bd_haus, amp: 2
   sleep 2
-  sample :elec_tick
+  ##| sample :elec_tick, amp: 2
   sleep 1
 end
-
