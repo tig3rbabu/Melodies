@@ -1,0 +1,37 @@
+use_bpm 140
+
+mel1 = ring(53,52,53,55,53,55,57,55,57,60,58,57,55)
+mel2 = ring(53,65,65,65,65,64,62,60,58,62,62,62,62,60,58,57,55,58,58,58,58,57,60,53,57,55,53,52,53)
+
+tm1 = [2,1,1,2,1,1,2,1,1,1,1,1,1].ring
+tm2 = knit(1,28,4,1)
+
+live_loop :melody do
+  tick(:i)
+  mel = ring(mel1,mel1,mel2).look(:i)
+  tt = ring(tm1,tm1,tm2).look(:i)
+  tick_reset(:ii)
+  with_fx :echo, phase: 0.75, decay: 6, mix: 0.7 do
+    tt.length.times do
+      tick(:ii)
+      synth :dsaw, note: mel.look(:ii)+12
+      sleep tt.look(:ii)*0.5
+    end
+  end
+end
+
+live_loop :bass do
+  tb = ring(8,8,8,8,8,8,16)
+  hh = ring(53,55,57,50,53,60,46)
+  ch = ring(:major7,:major, 'm7','5','5','9sus4','5')
+  tick
+  synth :zawa, note: chord(hh.look+12, ch.look), sustain: tb.look*0.5
+  synth :dsaw, note: hh.look-24, sustain: tb.look*0.5, release: 0
+  sleep tb.look*0.5
+end
+
+
+
+
+
+
