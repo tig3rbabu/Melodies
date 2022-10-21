@@ -1,0 +1,29 @@
+use_bpm 90
+
+mel1 = ring(64,64,65,67,67,65,64,62,60,60,62,64,64,62,62)
+mel2 = ring(64,64,65,67,67,65,64,62,60,60,62,64,62,60,60)
+mel3 = ring(62,64,60,62,64,65,64,60,62,64,65,64,62,60,62,55)
+tm1 = [1,1,1,1,1,1,1,1,1,1,1,1,1.5,0.5,2]
+tm3 = [2,1,1,1,0.5,0.5,1,1,1,0.5,0.5,1,1,1,1,2]
+
+live_loop :odetojoy do
+  tick(:i)
+  mel = [mel1,mel2,mel3,mel2].ring.look(:i)
+  tt = [tm1,tm1,tm3,tm1].ring.look(:i)
+  tick_reset(:ii)
+  with_fx :echo, phase: 0.75, decay: 6, mix: 0.6 do
+    tt.length.times do
+      tick(:ii)
+      synth :dsaw, note: mel.look(:ii)+12, release: 0.75
+      sleep tt.ring.look(:ii)*0.5
+    end
+  end
+end
+
+live_loop :bass do
+  tick
+  synth :zawa, note: chord(ring(65,60,62,55).look-0,ring(:major7,'5','5','5').look), release: 6, cutoff: 85, amp: 2
+  synth :dsaw, note: ring(65,60,62,55).look-24, sustain: 4, release: 0
+  synth :dsaw, note: ring(65,60,62,55).look-36, sustain: 4, release: 0
+  sleep 4
+end
