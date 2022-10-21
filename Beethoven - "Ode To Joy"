@@ -22,7 +22,7 @@ end
 
 live_loop :bass do
   tick
-  synth :zawa, note: chord(ring(65,60,62,55).look-0,ring(:major7,'5','5','5').look), release: 6, cutoff: 85, amp: 2
+  synth :zawa, note: chord(ring(65,60,62,55).look-0,ring(:major7,'5','m7','5').look), release: 6, cutoff: 85, amp: 2
   synth :dsaw, note: ring(65,60,62,55).look-24, sustain: 4, release: 0
   synth :dsaw, note: ring(65,60,62,55).look-36, sustain: 4, release: 0
   sleep 4
