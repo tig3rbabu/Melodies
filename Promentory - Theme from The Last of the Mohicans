@@ -18,7 +18,7 @@ tm2 = [0.4444,0.2222,1-0.6666,0.4444,0.2222,1-0.6666,0.3333,0.3333,1-0.6666,0.33
 
 live_loop :hhoart do
   tick
-  synth :dsaw, note: highpart.look+24, sustain: th1.ring.look*0.5, release: 0, amp: 0.8
+  synth :dsaw, note: highpart.look+24, sustain: th1.ring.look*0.5, release: 0, amp: 0.8, cutoff: 80
   sleep th1.ring.look*0.5
 end
 
@@ -29,7 +29,7 @@ live_loop :violins do
   with_fx :gverb, room: 69, release: 6, mix: 0.2, amp: 0.8 do
     mel.length.times do
       tick(:ii)
-      synth :dsaw, note: mel.look(:ii)+12, attack: 0.1111, sustain: 0.2222, release: 0.12
+      synth :dsaw, note: mel.look(:ii)+12, attack: 0.1111, sustain: 0.2222, release: 0.12, cutoff: 95
       sleep tt.ring.look(:ii)
     end
   end
