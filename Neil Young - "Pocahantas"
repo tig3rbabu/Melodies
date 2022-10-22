@@ -1,11 +1,5 @@
 use_bpm 105
 
-
-live_loop :metro do
-  sample :drum_cymbal_closed
-  sleep 1
-end
-
 chordy = ring(60,60,62,60,55,58,65,60,55,58,65,60)
 mod = knit(:major,2,:minor,1,:major,9)
 tch = [8,8,8,8,4,2,2,8,4,2,2,8]
@@ -23,20 +17,23 @@ t4 = [1,1,2,1,1,6,1,1,2,2,15]
 ##| puts mel3.length
 
 live_loop :melody do
-  with_fx :flanger, mix: 1 do
-    tick(:i)
-    if look(:i)==0
-      sleep 7.5
-    else sleep 0
-    end
-    mel = ring(mel1,mel2,mel3,mel4).look(:i)
-    tt = ring(t1,t2,t3,t4).look(:i)
-    syn = synth :prophet, note: 60+12, sustain: tt.sum*0.5-4, release: 6
-    tick_reset(:ii)
-    tt.length.times do
-      tick(:ii)
-      control syn, note: mel.look(:ii)+12
-      sleep tt.ring.look(:ii)*0.5
+  with_fx :gverb, room: 49, release: 1.5, mix: 0.2 do
+    with_fx :flanger, mix: 1 do
+      tick(:i)
+      if look(:i)==0
+        sleep 7.5
+      else
+        sleep 0
+      end
+      mel = ring(mel1,mel2,mel3,mel4).look(:i)
+      tt = ring(t1,t2,t3,t4).look(:i)
+      syn = synth :sine, note: 60+0, sustain: tt.sum*0.5-4, release: 6, cutoff: 85
+      tick_reset(:ii)
+      tt.length.times do
+        tick(:ii)
+        control syn, note: mel.look(:ii)+0
+        sleep tt.ring.look(:ii)*0.5
+      end
     end
   end
 end
@@ -45,12 +42,12 @@ live_loop :chprds do
   tick(:i)
   if look(:i)==0
     1.times do
-      synth :zawa, note: chord(60,:major), sustain: tch.ring.look, release: 0, cutoff: 75
+      synth :organ_tonewheel, note: chord(60+12,:major), attack: 4, release: 2, cutoff: 75, amp: 3
       sleep 8
     end
   else
     tick(:ii)
-    synth :zawa, note: chord(chordy.look(:ii),mod.look(:ii)), sustain: tch.ring.look(:ii)-2, release: 0, cutoff: 75
+    synth :organ_tonewheel, note: chord(chordy.look(:ii)+12,mod.look(:ii)), sustain: tch.ring.look(:ii)-2, release: 0, cutoff: 75, amp: 3
     sleep tch.ring.look(:ii)
   end
 end
@@ -59,7 +56,7 @@ live_loop :bass do
   tick(:i)
   if look(:i)==0
     1.times do
-      synth :dsaw, note: 60-36, sustain: tch.ring.look, release: 0, cutoff: 60
+      synth :dsaw, note: 60-36, sustain: tch.ring.look(:ii), release: 0, cutoff: 60
       sleep 8
     end
   else
@@ -70,14 +67,23 @@ live_loop :bass do
 end
 
 with_fx :gverb, room: 49, release: 1.5, mix: 0.3 do
-  live_loop :kick do
-    sample :bd_haus, cutoff: 90, amp: 1.5
-    sleep 2
-  end
-  
-  live_loop :snare do
-    sleep 2
-    sample :sn_dub, rate: 0.7, amp: 1.2
-    sleep 2
+  with_fx :lpf, cutoff: 90, mix: 0.6 do
+    live_loop :kick do
+      sample :bd_haus, cutoff: 90, amp: 1.5
+      sleep 2
+    end
+    
+    live_loop :metro do
+      sample :drum_cymbal_closed
+      sleep 0.5
+      sample :drum_cymbal_closed, start: 0.2
+      sleep 0.5
+    end
+    
+    live_loop :snare do
+      sleep 2
+      sample :drum_snare_hard, rate: 0.9, amp: 1.2
+      sleep 2
+    end
   end
 end
