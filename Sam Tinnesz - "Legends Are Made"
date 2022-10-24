@@ -1,0 +1,76 @@
+use_bpm 88
+
+bass1 = ring(62,65,60,nil)
+bass2 = ring(62,60,62,72,65)
+tb1 = [8,8,8,8]
+tb2 = [7,1,4,2,2]
+tb2s = [2,1,2,2,2]
+
+ohh = ring(62,65,69,62,65,60,62,65,69,nil,nil,nil)
+to1 = [2,2,4]
+
+v1 = ring(60,62,62,60,62,62,65,60,60,62,60,62)
+v2 = ring(nil,62,60,57,55,53,53,50,62,60,57,55,53,53,50)
+v3 = ring(60,62,62,60,62,62,65,60,69,67,65,67,65,62,62)
+tv1 = knit(1,11,5,1)
+tv2 = ring(1,1,1,1,1,0.5,0.5,3,1,1,1,1,0.5,0.5,2)
+tv3 = knit(1,7,2,1,1,7)
+
+puts v1.length
+
+a = 1
+
+live_loop :meldoy do
+  tick(:i)
+  mel = [v1,v1,v2,v3].ring.look(:i)
+  tv = [tv1,tv1,tv2,tv3].ring.look(:i)
+  tick_reset(:ii)
+  with_fx :gverb, room: 69, release: 4, mix: 0.3, amp: 1.5 do
+    mel.length.times do
+      tick(:ii)
+      synth :dsaw, note: mel.look(:ii)+12, sustain: 0, release: 1, amp: 1
+      sleep tv.ring.look(:ii)*0.5
+    end
+  end
+end
+
+live_loop :oh do
+  tick
+  if look==0
+    sleep 1
+  else
+    sleep 0
+  end
+  with_fx :gverb, room: 69, release: 4, mix: 0.3, amp: 1.5 do
+    ##| synth :dsaw, note: ohh.look+0, sustain: 1, release: 0, amp: 1
+    sleep to1.ring.look*0.5
+  end
+end
+
+live_loop :bass do
+  bass = [bass1,bass2][a]
+  tb = [tb1,tb2][a]
+  tbs = [tb1,tb2s][a]
+  tick_reset(:ii)
+  with_fx :gverb, room: 69, release: 2, mix: 0.2, amp: 1 do
+    with_fx :distortion, distort: 0.999, mix: 0.5, amp: 0.8 do
+      tb.length.times do
+        tick(:ii)
+        synth :fm, note: bass.look(:ii)-12, release: tbs.ring.look*0.5, depth: 3
+        synth :dsaw, note: bass.look(:ii)-24, sustain: tbs.ring.look*0.5, release: 0
+        synth :dsaw, note: bass.look(:ii)-36, sustain: tbs.ring.look*0.5, release: 0, cutoff: 75
+        sleep tb.ring.look(:ii)*0.5
+      end
+    end
+  end
+end
+
+live_loop :beat do
+  with_fx :gverb, room: 69, release: 2, mix: 0.2, amp: 1.5 do
+    sample :bd_haus, cutoff: 95, amp: 3, rate: 0.8
+    sleep 1
+    sample :perc_snap, rate: 0.5
+    synth :cnoise, release: 0.75
+    sleep 1
+  end
+end
