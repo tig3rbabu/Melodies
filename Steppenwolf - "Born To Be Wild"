@@ -1,0 +1,53 @@
+use_bpm 135
+
+ch1 = ring(64,64,64,64,64,64,nil,64,nil,64)
+ch1a = ring(71,71,71,71,71,71,73,71,74,71)
+fc1 = knit(:major,5,'5',3)
+sc1 = [2,1,2,2,2,2,1,2,1,1]
+tc1 = [3,1,3,2,2,1,1,1,1,1]
+
+ch2 = ring(67,69,64)
+fc2 = ring('5')
+tc2 = [4,4,8]
+
+ch3 = ring(64,67,69,67,64)
+fc3 = ring('5')
+tc3 = [16,16,8,8,16]
+
+ch4 = ring(64,64,64,62,62)
+fc4 = ring('5')
+tc4 = [4,1,3,4,4]
+
+a = 3
+
+live_loop :riffy do
+  ch = [ch1,ch2,ch3,ch4][a]
+  tc = [tc1,tc2,tc3,tc4][a]
+  fc = [fc1,fc2,fc3,fc4][a]
+  sc = [sc1,tc2,tc3,tc4][a]
+  tick_reset(:ii)
+  with_fx :distortion, distort: 0.999, mix: 0.8, amp: 0.5 do
+    ch.length.times do
+      tick(:ii)
+      synth :dsaw, note: chord(ch.look(:ii)-12, fc.look(:ii)), release: sc.look(:ii)*0.5
+      if a==0
+        synth :fm, note: ch.look(:ii)-24, depth: 2
+      else
+        with_fx :slicer, phase: 1, wave: 1, mix: 1 do
+          synth :fm, note: ch.look(:ii)-24, depth: 2, sustain: tc.ring.look(:ii)*0.5, release: 0
+        end
+      end
+      if a==0
+        synth :dsaw, note: ch1a.look(:ii)-12, release: sc.look(:ii)*0.5
+      else
+        sleep 0
+      end
+      sleep tc.ring.look(:ii)*0.5
+    end
+  end
+end
+
+live_loop :beat do
+  sample :bd_haus, amp: 3
+  sleep 1
+end
