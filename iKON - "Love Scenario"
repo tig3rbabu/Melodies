@@ -1,0 +1,65 @@
+use_bpm 120
+
+bass1 = ring(60,62,59,64)
+tb1 = [3,2,2,1]
+tb1a = [3,2,2,1]
+
+mel1 = ring(59,57,55,59,62,59,57,55,59,57,59,57,55,57,57,55,57,59,55)
+tm1 = [1,1,1,1,4,1,1,1,1,4,1,1,1,2,1,1,2,1,6]
+mel2 = ring(55,55,55,64,62,59,57,55,59,57,55,55,55,64,62,59,57,55,57,55)
+mel3 = ring(55,55,55,64,67,64,67,67,64,62,55,55,55,64,62,59,57,55,57,55)
+tm2 = [1,1,1,2,1,3,1,1,1,4,1,1,1,2,1,3,1,1,1,4,]
+mel4 = knit(59,7,57,1,59,4,57,1,59,1,55,1,57,1)
+tm4 = [2,1,1,2,1,1,1,3,2,1,1,1,3,2,2,8]
+
+puts mel4.length
+puts tm4.length
+puts tm4.sum
+
+live_loop :meoldu do
+  tick(:i)
+  if look(:i)==0
+    sleep 14.5
+  else
+    sleep 0
+  end
+  mel = [mel1,mel1,mel2,mel3,mel4,mel4].ring.look(:i)
+  tt = [tm1,tm1,tm2,tm2,tm4,tm4].ring.look(:i)
+  tick_reset(:ii)
+  with_fx :echo, phase: 0.75, decay: 6, mix: 0.6 do
+    mel.length.times do
+      tick(:ii)
+      synth :dsaw, note: mel.look(:ii)+12, amp: 1.4
+      sleep tt.ring.look(:ii)*0.5
+    end
+  end
+end
+
+live_loop :bass do
+  tick
+  synth :dsaw, note: bass1.look-36, sustain: 4, release: 0, cutoff: 60, amp: 3
+  sleep 4
+end
+
+live_loop :pianoriff do
+  with_fx :gverb, room: 69, release: 2, mix: 0.2,amp: 0.8 do
+    bass = bass1.tick(:i)
+    tb1.length.times do
+      tick(:ii)
+      synth :piano, note: bass, release: 0.5, hard: 0.5, vel: 0.4
+      sleep tb1.ring.look(:ii)*0.5
+    end
+  end
+end
+
+live_loop :pianoriff2 do
+  bass = bass1.tick(:i)
+  ch = knit(:major,2,:minor,2).look(:i)
+  with_fx :gverb, room: 69, release: 2, mix: 0.2, amp: 0.8 do
+    2.times do
+      sleep 1
+      synth :piano, note: chord(bass,ch), release: 0.5, hard: 0.5, vel: 0.4
+      sleep 1
+    end
+  end
+end
