@@ -14,9 +14,14 @@ bass2 = ring(62,60,58,60)
 
 puts tv.sum
 
+r = 1
+
+slide = [32,64][r]
+cutst = [120,60][0]
+a = [0,1][r]
+
 live_loop :chorus do
   sleep 1
-  a = 1
   mel = [verse, pre][a]
   tt = [tv,tp][a]
   with_fx :slicer, phase: 1, wave: 0, mix: 1 do
@@ -41,10 +46,11 @@ end
 
 
 live_loop :beat do
-  with_fx :lpf, cutoff: 120, cutoff_slide: 64, mix: 1 do |gg|
+  with_fx :lpf, cutoff: cutst, cutoff_slide: slide, mix: 1 do |gg|
     control gg, cutoff: 120
-    2.times do
-      ff = 32
+    ff = 32
+    n = slide/ff
+    n.times do
       sample :loop_amen_full, beat_stretch: ff
       sleep ff
     end
@@ -52,12 +58,13 @@ live_loop :beat do
 end
 
 live_loop :bass do
-  bass = [bass1,bass2][0]
-  with_fx :lpf, cutoff: 120, cutoff_slide: 64, mix: 1 do |gg|
+  bass = [bass1,bass2][a]
+  with_fx :lpf, cutoff: cutst, cutoff_slide: slide, mix: 1 do |gg|
     control gg, cutoff: 120
+    n = slide/8
     with_fx :slicer, phase: 0.5, wave: 0, mix: 0 do
-      with_fx :distortion, distort: 0.99, mix: 0.8, amp: 0.7 do
-        8.times do
+      with_fx :distortion, distort: 0.99, mix: 0.0, amp: 1 do
+        n.times do
           tick
           synth :dsaw, note: bass.look-24, sustain: 8, release: 0
           synth :dsaw, note: bass.look-36, sustain: 8, release: 0
@@ -81,9 +88,7 @@ end
 
 live_loop :tickas do
   16.times do
-    sample :drum_cymbal_closed, rate: 4
+    ##| sample :drum_cymbal_closed, rate: 4
     sleep 0.5
   end
 end
-
-
