@@ -17,14 +17,15 @@ puts tv.sum
 r = 1
 
 slide = [32,64][r]
-cutst = [120,60][0]
+cutst = [130,60][0]
 a = [0,1][r]
+oc = [12,36][r]
 
 live_loop :chorus do
   sleep 1
   mel = [verse, pre][a]
   tt = [tv,tp][a]
-  with_fx :slicer, phase: 1, wave: 0, mix: 1 do
+  with_fx :slicer, phase: 1, wave: 0, mix: 0 do
     vox = synth :dsaw, note: 65+2, sustain: tt.sum, release: 0, note_slide: 0.5*a
     tick_reset
     tt.count.times do
@@ -47,11 +48,11 @@ end
 
 live_loop :beat do
   with_fx :lpf, cutoff: cutst, cutoff_slide: slide, mix: 1 do |gg|
-    control gg, cutoff: 120
+    control gg, cutoff: 130
     ff = 32
     n = slide/ff
     n.times do
-      sample :loop_amen_full, beat_stretch: ff
+      sample :loop_amen_full, beat_stretch: ff, amp: 1.5
       sleep ff
     end
   end
@@ -60,14 +61,14 @@ end
 live_loop :bass do
   bass = [bass1,bass2][a]
   with_fx :lpf, cutoff: cutst, cutoff_slide: slide, mix: 1 do |gg|
-    control gg, cutoff: 120
+    control gg, cutoff: 130
     n = slide/8
     with_fx :slicer, phase: 0.5, wave: 0, mix: 0 do
-      with_fx :distortion, distort: 0.99, mix: 0.0, amp: 1 do
+      with_fx :distortion, distort: 0.99, mix: 0.0, amp: 0.9 do
         n.times do
           tick
           synth :dsaw, note: bass.look-24, sustain: 8, release: 0
-          synth :dsaw, note: bass.look-36, sustain: 8, release: 0
+          synth :dsaw, note: bass.look-oc, sustain: 8, release: 0
           sleep 8
         end
       end
@@ -82,7 +83,7 @@ end
 
 live_loop :sane do
   sleep 2
-  sample :sn_dub
+  ##| sample :sn_dub
   sleep 2
 end
 
