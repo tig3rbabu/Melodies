@@ -1,0 +1,87 @@
+use_bpm 120
+
+mel1 = ring(62,64,65,69,67,65,67,65,67,69,62,64,64,62)
+tm1 = [1,1,1,1,1,1,2,1,1,1,1,1,1,2]
+
+cho = ring(62,62,65,69,67,65,67,67,65,67,69,62,62,62,62,62)
+
+puts mel1.length
+puts tm1.length
+puts tm1.sum
+
+live_loop :melody2 do
+  with_fx :gverb, room: 69, release: 5, mix: 0.0 do
+    with_fx :wobble, phase: 12, cutoff_max: 110, wave: 0, mix: 1 do
+      suspiria = synth :tb303, note: mel1[0], sustain: tm1.sum
+      tm1.length.times do
+        tick
+        control suspiria, note: mel1.look+12
+        sleep tm1.ring.look
+      end
+    end
+  end
+end
+
+live_loop :melody do
+  with_fx :gverb, room: 69, release: 5, mix: 0.2 do
+    tm1.length.times do
+      tick
+      synth :dtri, note: mel1.look+24
+      synth :organ_tonewheel, note: mel1.look+24, amp: 1, release: 1, sustain: 0
+      sleep tm1.ring.look
+    end
+  end
+end
+
+live_loop :cho do
+  sleep 1-0.6666
+  with_fx :gverb, room: 69, release: 5, mix: 0.2 do
+    tick(:i)
+    d = ring(1,0)
+    2.times do
+      tick(:ii)
+      synth :dtri, note: chord(cho.look(:i)+12,'5')[d.look(:ii)]
+      sleep 0.3333
+    end
+  end
+end
+
+live_loop :bass do
+  with_fx :gverb, room: 69, release: 8, mix: 0.3 do
+    sleep 7
+    ff = synth :fm, note: 64-12, note_slide: 1, sustain: 2, release: 1
+    control ff, note: 62-12
+    sleep 1
+  end
+end
+
+live_loop :guitar2 do
+  with_fx :gverb, room: 69, release: 8, mix: 0.3 do
+    sleep 7
+    tick(:ii)
+    ##| synth :pluck, note: chord(ring(62,67,65,62).look(:ii)+12,'5'), amp: 5, release: 8
+    ##| synth :pluck, note: chord(ring(62,67,65,62).look(:ii)+0,'5'), amp: 5, release: 8
+    sleep 1
+  end
+end
+
+live_loop :guitar do
+  tick(:ii)
+  with_fx :echo, phase: 0.75, decay: 6, mix: 0.8 do
+    8.times do
+      tick(:i)
+      synth :pluck, note: chord(ring(62,67,65,62).look(:ii),'5'), amp: 4
+      sleep 0.5
+    end
+  end
+end
+
+live_loop :drone do
+  with_fx :gverb, room: 69, release: 8, mix: 0.3 do
+    with_fx :wobble, phase: 12, cutoff_max: 110, wave: 0, invert_wave: 1, mix: 1 do
+      synth :dsaw, note: 62-12, attack: 8, release: 8, detune: 0.2
+      synth :dsaw, note: 62-24, attack: 8, release: 8, detune: 0.2
+      sleep 16
+    end
+  end
+end
