@@ -1,0 +1,136 @@
+use_bpm 172
+
+live_loop :metro do
+  sleep 4
+end
+
+arpg1 = ring(54,61,64,54,61,64,61,54,57,61,64,59,63,64,63,59)
+arpg2 = ring(71,70,66,61,69,68,64,59,67,66,62,57,69,68,64,59)
+tpg1 = [1]
+tpg2 = [1.5,1.5,1,12]
+
+riff0 = ring(nil)
+
+riff1 = ring(66)
+riff2 = ring(62,64)
+riffcho = ring(66,69,76,71)
+tr0 = [16]
+tr1 = [16]
+tr2 = [8,8]
+trcho = [1.5,2,2,2.5]
+
+bass1 = ring(54,54,56,57,59,54,54,56,57,52)
+bass2 = ring(62,64,59)
+basscho = ring(66,69,76,71,69,68)
+bassb = ring(66,66,66,68,68,64,67,69,71,64,69,68)
+tb1 = [6,1,1,3,5,6,1,1,3,5]
+tb2 = [16,8,8]
+tbcho = [3,4,4,3,1,1]
+tbb = [8,4,4,8,4,4,8,4,4,8,4,4]
+
+mel1 = ring(66,61,57,59,57,59,57,59,61,54,54,57,66,66,61,59,57,59,57,59,57,59,61,54,54)
+mel2 = ring(69,66,64,66,64,66,61,69,69,66,66,66,64,66,64,66)
+mel3 = ring(nil,64,66,64,66,66,66,64,66,64,71,66,66,66)
+melcho1 = ring(64,66,66,69,66,66,71,64,66,66,69,66,66)
+melcho2 = ring(64,66,64,66,66,66,61,59,57,59,59,59,57,59,57,61,54,54,71,71,71,69,73,66,66)
+tm1 = [4,1,1,2,1,2,1,2,1,1,1,2+13,2,1,1,1,1,2,1,2,1,2,1,1,2+14]
+tm2 = [4,1,1,2,1,4,1,2,2,1,1,1,1,2,1,2+5]
+tm3 = [3,1,1,1,2,1,10,1,1,1,1,1,1,2]
+tmcho1 = [1,1,1,1,1,9,2,1,1,1,1,1,11]
+tmcho2 = [1,1,1,1,2,2,1,1,1,1,2,2,1,1,1,1,1,9,2,1,1,1,1,1,11]
+
+puts mel1.length
+puts tm1.length
+puts tm1.sum
+
+s = 5
+a = [0,1,2,3,4,0][s]
+b = [0,0,1,2,2,3][s]
+c = [0,0,0,0,0,1][s]
+
+live_loop :melody, sync: :metro do
+  stop
+  ##| tick_reset(:i)
+  tick(:i)
+  ##| mel = [mel1,mel2,mel3].ring.look(:i)
+  ##| tt = [tm1,tm2,tm3].ring.look(:i)
+  mel = [mel1,mel2,mel3,melcho1,melcho2][a]
+  tt = [tm1,tm2,tm3,tmcho1,tmcho2][a]
+  if look(:i)==0
+    sleep 1
+  else
+    sleep 0
+  end
+  tick_reset(:ii)
+  with_fx :echo, phase: 0.75, decay: 6, mix: 0.8 do
+    mel.length.times do
+      tick(:ii)
+      synth :dsaw, note: mel.look(:ii)+12, amp: 1.2, release: 2
+      ##| synth :dtri, note: mel.look(:ii)+0, amp: 1.2, release: 0.75
+      sleep tt.ring.look(:ii)*1
+    end
+  end
+end
+
+live_loop :prechorus do
+  rif = [riff1,riff2,riffcho,riff0][b]
+  tr = [tr1,tr2,trcho,tr0][b]
+  tick_reset
+  with_fx :lpf, cutoff: 109, mix: 1 do
+    with_fx :distortion, distort: 0.999, mix: 0.8, amp: 0.4 do
+      tr.length.times do
+        tick
+        synth :dsaw, note: chord(rif.look-12, '5'), release: tr.ring.look
+        sleep tr.ring.look*2
+      end
+    end
+  end
+end
+
+live_loop :riff do
+  arpg = [arpg1,arpg2][c]
+  pg = [tpg1,tpg2][c]
+  arpg.length.times do
+    with_fx :distortion, distort: 0.99, mix: 0.8, amp: 0.8 do
+      with_fx :gverb, room: 69, release: 4, mix: 0.2 do
+        tick
+        ##| synth :fm, note: arpg.look+12, depth: 6, release: 1
+        synth :dsaw, note: arpg.look+0, depth: 12, release: pg.ring.look*0.5
+        sleep pg.ring.look*1
+      end
+    end
+  end
+end
+
+live_loop :bass do
+  bass = [bass1,bass2,basscho,bassb][b]
+  tb = [tb1,tb2,tbcho,tbb][b]
+  tick_reset(:ii)
+  with_fx :gverb, room: 69, release: 2, mix: 0.2 do
+    with_fx :lpf, cutoff: 100, mix: 1 do
+      with_fx :bitcrusher, sample_rate: 5000, mix: 1.0 do
+        with_fx :slicer, phase: 1, wave: 0, mix: 0 do
+          with_fx :wobble, phase: tb.sum, cutoff_max: 90, cutoff_min: 40, mix: 1 do
+            tb.length.times do
+              tick(:ii)
+              ##| synth :fm, note: bass.look(:ii)-12, release: tb.ring.look(:ii)*1, depth: 3, amp: 2
+              synth :dsaw, note: bass.look(:ii)-24, sustain: tb.ring.look(:ii)*1, release: 0, depth: 3, amp: 2
+              synth :dsaw, note: bass.look(:ii)-36, sustain: tb.ring.look(:ii)*1, release: 0, amp: 3
+              sleep tb.ring.look(:ii)*1
+            end
+          end
+        end
+      end
+    end
+  end
+end
+
+live_loop :highstring do
+  with_fx :gverb, room: 69, release: 4, mix: 0.2 do
+    with_fx :slicer, phase: 1, wave: 0, mix: 1 do
+      synth :dtri, note: 66+24, attack: 16, release: 16, amp: 2
+      sleep 32
+    end
+  end
+end
+
