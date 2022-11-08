@@ -8,14 +8,14 @@ tb2 = [2,13,1,2,6,1,1,1,1,4]
 tbp1 = [2,1,1,2,1]
 tbp2 = [2,1,1,2,1,1,1,1,1,4]
 
-git1 = ring(57,59,59,59,57,59,59,59)
-git2 = ring(59,60,62,64,62,64,62,64,64,62)
+git1 = ring(57,59,59,59,57,59,59,59,57,59,59,59,57,59,59,59)
+git2 = ring(59,60,62,64,62,64,62,64,64,62,59,60,62,64,62,64,62,64,64,62)
 git3 = ring(66,64,66,64,66,64,64,62,62,59,62,59,62,64)
-git4 = ring(62,59,62,59,62,59,62,62,64,64,62,59)
-tg1 = [2,1,3,2,2,1,3,2]
-tg2 = [1,1,2,2,1,2,1,2,2,2]
+git4 = ring(62,59,62,59,62,59,62,62,64,64,62,59,62,59,62,59,62,59,62,62,64,64,62,59)
+tg1 = [2,1,3,2,2,1,3,2,2,1,3,2,2,1,3,2]
+tg2 = [1,1,2,2,1,2,1,2,2,2,1,1,2,2,1,2,1,2,2,2]
 tg3 = [4,4,2,2,2,2,4,4,2,1,2,1,1,1]
-tg4 = [2,1,2,1,1,1,2,1,1,2,1,1]
+tg4 = [2,1,2,1,1,1,2,1,1,2,1,1,2,1,2,1,1,1,2,1,1,2,1,1]
 
 vox1 = ring(62,64,66,66,64,64,64,60)
 vox2 = knit(nil,1,62,9,60,1,64,9,66,1)
@@ -27,40 +27,45 @@ tv2 = [4,1,1,1,1,2,2,1,1,1,4,2,1,1,1,3,2,1,1,1,0]
 tv3 = [4,1,1,1,1,2,2,1,1,1,4,1,1,1,1,1,2,2,1,1,1,1,0]
 tchv1 = [3,3,3,3,2,1,1,1,1,14]
 
-puts vox2.length
-puts tv2.length
-puts tv2.sum
+##| puts vox2.length
+##| puts tv2.length
+puts tg4.sum
 
-s = 8
-x = [1,1,0,1,0,0,1,1,0][s]
-vx = [0,0,0,0,1,2,3,3,3][s]
-gt = [0,1,0,0,2,2,2,3,3][s]
+live_loop :sett do
+  set :ss, ring(0,1,2,3,4,5,6,7,8).tick
+  s = get[:ss]
+  set :x, [1,1,0,1,0,0,1,1,0][s]
+  set :vx, [0,0,0,0,1,2,3,3,3][s]
+  set :gt, [0,1,0,0,2,2,2,3,3][s]
+  sleep 32
+end
 
+sleep 1
 v = 1
 
 live_loop :vox do
-  vox = [vox1,vox2,vox3,chvox1][vx]
-  tv = [tv1,tv2,tv3,tchv1][vx]
+  vox = [vox1,vox2,vox3,chvox1][get[:vx]]
+  tv = [tv1,tv2,tv3,tchv1][get[:vx]]
   tick_reset
   tv.length.times do
     with_fx :echo, phase: 0.75, decay: 6, mix: 0.8 do
       tick
-      synth :dsaw, note: vox.look+12, env_curve: 3, amp: 2*(1-x)
-      synth :dsaw, note: vox.look+4, env_curve: 3, amp: 2*(1-x)
+      synth :dsaw, note: vox.look+12, env_curve: 3, amp: 2*(1-get[:x])
+      ##| synth :dsaw, note: vox.look+4, env_curve: 3, amp: 2*(1-x)
       sleep tv.look*0.5
     end
   end
 end
 
 live_loop :guitaristan do
-  git = [git1,git2,git3,git4][gt]
-  tg = [tg1,tg2,tg3,tg4][gt]
+  git = [git1,git2,git3,git4][get[:gt]]
+  tg = [tg1,tg2,tg3,tg4][get[:gt]]
   tick_reset
   tg.length.times do
     with_fx :distortion, distort: 0.99, mix: 0.9, amp: 0.7 do
       with_fx :gverb, room: 69, release: 2, mix: 0.1 do
         tick
-        synth :dsaw, note: git.look+0, env_curve: 3, amp: x
+        synth :dsaw, note: git.look+0, env_curve: 3, amp: get[:x]
         sleep tg.look*0.5
       end
     end
@@ -76,7 +81,7 @@ live_loop :bass do
   tb.length.times do
     tick(:ii)
     ss = tb.ring.look(:ii)
-    with_fx :slicer, phase: tbp.ring.look(:ii)*0.5, wave: 0, mix: 1 do
+    with_fx :slicer, phase: tbp.ring.look(:ii)*0.5, wave: 0, mix: 1, amp: 2 do
       synth :fm, note: bass.look(:ii)-24, decay: ss*0.5, release: 0, depth: 3
       synth :fm, note: bass.look(:ii)-12, decay: ss*0.5, release: 0, depth: 2
       sleep ss*0.5
