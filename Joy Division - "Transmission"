@@ -1,6 +1,5 @@
 use_bpm 150
 
-
 bass1 = ring(62,62,57,60,60)
 bass2 = ring(62,62,57,60,60,64,65,64,65,67)
 tb1 = [2,13,1,2,14]
@@ -9,6 +8,7 @@ tbp1 = [2,1,1,2,1]
 tbp2 = [2,1,1,2,1,1,1,1,1,4]
 
 git1 = ring(57,59,59,59,57,59,59,59,57,59,59,59,57,59,59,59)
+git1b = ring(69,71,71,71,69,71,71,71,57,59,59,59,57,59,59,59)
 git2 = ring(59,60,62,64,62,64,62,64,64,62,59,60,62,64,62,64,62,64,64,62)
 git3 = ring(66,64,66,64,66,64,64,62,62,59,62,59,62,64)
 git4 = ring(62,59,62,59,62,59,62,62,64,64,62,59,62,59,62,59,62,59,62,62,64,64,62,59)
@@ -27,30 +27,28 @@ tv2 = [4,1,1,1,1,2,2,1,1,1,4,2,1,1,1,3,2,1,1,1,0]
 tv3 = [4,1,1,1,1,2,2,1,1,1,4,1,1,1,1,1,2,2,1,1,1,1,0]
 tchv1 = [3,3,3,3,2,1,1,1,1,14]
 
-##| puts vox2.length
-##| puts tv2.length
-puts tg4.sum
-
 live_loop :sett do
-  set :ss, ring(0,1,2,3,4,5,6,7,8).tick
+  set :ss, ring(0,1,2,3,4,5,6,7,8,9,10,11,12,13,14).tick
   s = get[:ss]
-  set :x, [1,1,0,1,0,0,1,1,0][s]
-  set :vx, [0,0,0,0,1,2,3,3,3][s]
-  set :gt, [0,1,0,0,2,2,2,3,3][s]
-  sleep 32
+  ##| s = 0
+  set :x, [1,1,1,0,1,1,0,0,1,1,0,0,0,0,0][s]
+  set :a, [0,0,0,0,0,0,1,2,3,3,3,1,2,3,3][s]
+  set :b, [0,4,1,0,0,4,2,2,2,3,3,3,3,3,3][s]
+  set :c, knit(0,9,12,6)[s]
+  sleep knit(16,2,32,2,16,2,32,9)[s]
 end
 
 sleep 1
-v = 1
+v = 0
 
 live_loop :vox do
-  vox = [vox1,vox2,vox3,chvox1][get[:vx]]
-  tv = [tv1,tv2,tv3,tchv1][get[:vx]]
+  vox = [vox1,vox2,vox3,chvox1][get[:a]]
+  tv = [tv1,tv2,tv3,tchv1][get[:a]]
   tick_reset
   tv.length.times do
     with_fx :echo, phase: 0.75, decay: 6, mix: 0.8 do
       tick
-      synth :dsaw, note: vox.look+12, env_curve: 3, amp: 2*(1-get[:x])
+      ##| synth :dsaw, note: vox.look+get[:c], env_curve: 3, amp: 2*(1-get[:x])
       ##| synth :dsaw, note: vox.look+4, env_curve: 3, amp: 2*(1-x)
       sleep tv.look*0.5
     end
@@ -58,14 +56,14 @@ live_loop :vox do
 end
 
 live_loop :guitaristan do
-  git = [git1,git2,git3,git4][get[:gt]]
-  tg = [tg1,tg2,tg3,tg4][get[:gt]]
+  git = [git1,git2,git3,git4,git1b][get[:b]]
+  tg = [tg1,tg2,tg3,tg4,tg1][get[:b]]
   tick_reset
   tg.length.times do
     with_fx :distortion, distort: 0.99, mix: 0.9, amp: 0.7 do
       with_fx :gverb, room: 69, release: 2, mix: 0.1 do
         tick
-        synth :dsaw, note: git.look+0, env_curve: 3, amp: get[:x]
+        ##| synth :dsaw, note: git.look+0, env_curve: 3, amp: get[:x]
         sleep tg.look*0.5
       end
     end
@@ -81,9 +79,10 @@ live_loop :bass do
   tb.length.times do
     tick(:ii)
     ss = tb.ring.look(:ii)
-    with_fx :slicer, phase: tbp.ring.look(:ii)*0.5, wave: 0, mix: 1, amp: 2 do
-      synth :fm, note: bass.look(:ii)-24, decay: ss*0.5, release: 0, depth: 3
-      synth :fm, note: bass.look(:ii)-12, decay: ss*0.5, release: 0, depth: 2
+    with_fx :slicer, phase: tbp.ring.look(:ii)*0.5, wave: 0, mix: 1, amp: 3 do
+      ##| synth :fm, note: bass.look(:ii)-24, decay: ss*0.5, release: 0, depth: 3
+      ##| synth :dsaw, note: bass.look(:ii)-36, decay: ss*0.5, release: 0, cutoff: 65
+      ##| synth :dsaw, note: bass.look(:ii)-24, decay: ss*0.5, release: 0, cutoff: 65
       sleep ss*0.5
     end
   end
@@ -93,7 +92,7 @@ end
 live_loop :riff do
   tick_reset(:ii)
   with_fx :distortion, distort: 0.8, mix: 1 do
-    with_fx :gverb, room: 69, release: 4, mix: 0.3, amp: 1 do
+    with_fx :gverb, room: 69, release: 4, mix: 0.3, amp: 1.2 do
       with_fx :lpf, cutoff: 80, cutoff_slide: 32, mix: 1 do |w|
         control w, cutoff: 130
         with_fx :slicer, phase: 16, wave: 0, invert_wave: 1, mix: 0.4 do
@@ -101,7 +100,7 @@ live_loop :riff do
             tick(:ii)
             ss = tb1.ring.look(:ii)
             with_fx :slicer, phase: tbp1.ring.look(:ii)*0.5, wave: 0, mix: 1 do
-              synth :dsaw, note: chord(bass1.look(:ii)-12,'5'), decay: ss*0.5, release: 0, depth: 3
+              ##| synth :dsaw, note: chord(bass1.look(:ii)-12,'5'), decay: ss*0.5, release: 0, depth: 3
               sleep ss*0.5
             end
           end
@@ -118,13 +117,30 @@ live_loop :riff2 do
       with_fx :gverb, room: 69, release: 4, mix: 0.3, amp: 1 do
         2.times do
           tick(:ii)
-          synth :dsaw, note: chord(ring(62,60).look(:ii)-12,'5'), release: 12, detune: 0.3, cutoff: 85
+          ##| synth :dsaw, note: chord(ring(62,60).look(:ii)-12,'5'), release: 12, detune: 0.3, cutoff: 85
           sleep 8
         end
       end
     end
   end
 end
+
+##| comment do
+##| with_fx :gverb, room: 69, release: 5, mix: 0.2, amp: v do
+##|   sleep 28
+##|   2.times do
+##|     sample :drum_snare_hard
+##|     sleep 0.5
+##|     2.times do
+##|       sample :drum_snare_soft
+##|       sleep 0.5
+##|     end
+##|   end
+##|   sample :drum_snare_hard
+##|   sleep 1
+##| end
+##| end
+
 
 live_loop :kick do
   with_fx :gverb, room: 69, release: 5, mix: 0.2, amp: v do
@@ -148,10 +164,23 @@ end
 
 live_loop :hhats do
   with_fx :gverb, room: 69, release: 5, mix: 0.1, amp: v do
-    4.times do
-      sample :drum_cymbal_closed
+    13.times do
+      sample :drum_cymbal_closed, rate: 0.7
       sleep 0.25
-      sample :drum_cymbal_closed, start: 0.1
+      sample :drum_cymbal_closed, rate: 0.8, start: 0.1
+      sleep 0.25
+    end
+    synth :cnoise, sustain: 0.15
+    2.times do
+      sample :drum_cymbal_closed, rate: 0.7
+      sleep 0.25
+      sample :drum_cymbal_closed, rate: 0.8, start: 0.1
+      sleep 0.25
+    end
+    synth :cnoise, sustain: 0.15
+    1.times do
+      sleep 0.25
+      sample :drum_cymbal_closed, rate: 0.8, start: 0.1
       sleep 0.25
     end
   end
