@@ -28,9 +28,9 @@ tv3 = [4,1,1,1,1,2,2,1,1,1,4,1,1,1,1,1,2,2,1,1,1,1,0]
 tchv1 = [3,3,3,3,2,1,1,1,1,14]
 
 live_loop :sett do
-  set :ss, ring(0,1,2,3,4,5,6,7,8,9,10,11,12,13,14).tick
+  ##| set :ss, ring(0,1,2,3,4,5,6,7,8,9,10,11,12,13,14).tick
+  set :ss, 14
   s = get[:ss]
-  ##| s = 0
   set :x, [1,1,1,0,1,1,0,0,1,1,0,0,0,0,0][s]
   set :a, [0,0,0,0,0,0,1,2,3,3,3,1,2,3,3][s]
   set :b, [0,4,1,0,0,4,2,2,2,3,3,3,3,3,3][s]
@@ -49,7 +49,7 @@ live_loop :vox do
     with_fx :echo, phase: 0.75, decay: 6, mix: 0.8 do
       tick
       ##| synth :dsaw, note: vox.look+get[:c], env_curve: 3, amp: 2*(1-get[:x])
-      ##| synth :dsaw, note: vox.look+4, env_curve: 3, amp: 2*(1-x)
+      ##| synth :dsaw, note: vox.look+4, env_curve: 3, amp: 2*(1-get[:x])
       sleep tv.look*0.5
     end
   end
@@ -100,7 +100,11 @@ live_loop :riff do
             tick(:ii)
             ss = tb1.ring.look(:ii)
             with_fx :slicer, phase: tbp1.ring.look(:ii)*0.5, wave: 0, mix: 1 do
-              ##| synth :dsaw, note: chord(bass1.look(:ii)-12,'5'), decay: ss*0.5, release: 0, depth: 3
+              if get[:ss]>=6
+                ##| synth :dsaw, note: chord(bass1.look(:ii)-12,'5'), decay: ss*0.5, release: 0, depth: 3
+              else
+                sleep 0
+              end
               sleep ss*0.5
             end
           end
@@ -117,7 +121,11 @@ live_loop :riff2 do
       with_fx :gverb, room: 69, release: 4, mix: 0.3, amp: 1 do
         2.times do
           tick(:ii)
-          ##| synth :dsaw, note: chord(ring(62,60).look(:ii)-12,'5'), release: 12, detune: 0.3, cutoff: 85
+          if get[:ss]>=10
+            ##| synth :dsaw, note: chord(ring(62,60).look(:ii)-12,'5'), release: 12, detune: 0.3, cutoff: 85
+          else
+            sleep 0
+          end
           sleep 8
         end
       end
@@ -125,63 +133,65 @@ live_loop :riff2 do
   end
 end
 
-##| comment do
-##| with_fx :gverb, room: 69, release: 5, mix: 0.2, amp: v do
-##|   sleep 28
-##|   2.times do
-##|     sample :drum_snare_hard
-##|     sleep 0.5
-##|     2.times do
-##|       sample :drum_snare_soft
-##|       sleep 0.5
-##|     end
-##|   end
-##|   sample :drum_snare_hard
-##|   sleep 1
-##| end
-##| end
-
-
-live_loop :kick do
-  with_fx :gverb, room: 69, release: 5, mix: 0.2, amp: v do
-    tick
-    sample :bd_haus, cutoff: 100
-    sleep ring(2,0.5,1.5,2,1,1).look
-  end
-end
-
-live_loop :snare do
-  with_fx :gverb, room: 69, release: 5, mix: 0.2, amp: v do
-    sleep 1
-    5.times do
+with_fx :compressor, amp: 1.4, mix: 1 do
+  ##| comment do
+  ##| with_fx :gverb, room: 69, release: 5, mix: 0.2, amp: v do
+  ##|   sleep 28
+  ##|   2.times do
+  ##|     sample :drum_snare_hard
+  ##|     sleep 0.5
+  ##|     2.times do
+  ##|       sample :drum_snare_soft
+  ##|       sleep 0.5
+  ##|     end
+  ##|   end
+  ##|   sample :drum_snare_hard
+  ##|   sleep 1
+  ##| end
+  ##| end
+  
+  ##| with_fx :compressor, amp: 1.4, mix: 1 do
+  live_loop :kick do
+    with_fx :gverb, room: 69, release: 5, mix: 0.2, amp: v do
       tick
-      sample :drum_snare_hard
-      sample :drum_snare_hard, cutoff: 100, rate: 0.8
-      sleep ring(2,2,1.5,1,0.5).look
+      sample :bd_haus, cutoff: 100, amp: 2.2
+      sleep ring(2,0.5,1.5,2,1,1).look
     end
   end
-end
-
-live_loop :hhats do
-  with_fx :gverb, room: 69, release: 5, mix: 0.1, amp: v do
-    13.times do
-      sample :drum_cymbal_closed, rate: 0.7
-      sleep 0.25
-      sample :drum_cymbal_closed, rate: 0.8, start: 0.1
-      sleep 0.25
+  
+  live_loop :snare do
+    with_fx :gverb, room: 69, release: 5, mix: 0.2, amp: v do
+      sleep 1
+      5.times do
+        tick
+        sample :drum_snare_hard
+        sample :drum_snare_hard, cutoff: 100, rate: 0.8
+        sleep ring(2,2,1.5,1,0.5).look
+      end
     end
-    synth :cnoise, sustain: 0.15
-    2.times do
-      sample :drum_cymbal_closed, rate: 0.7
-      sleep 0.25
-      sample :drum_cymbal_closed, rate: 0.8, start: 0.1
-      sleep 0.25
-    end
-    synth :cnoise, sustain: 0.15
-    1.times do
-      sleep 0.25
-      sample :drum_cymbal_closed, rate: 0.8, start: 0.1
-      sleep 0.25
+  end
+  
+  live_loop :hhats do
+    with_fx :gverb, room: 69, release: 5, mix: 0.1, amp: v do
+      13.times do
+        sample :drum_cymbal_closed, rate: 0.7
+        sleep 0.25
+        sample :drum_cymbal_closed, rate: 0.8, start: 0.1
+        sleep 0.25
+      end
+      synth :cnoise, sustain: 0.15
+      2.times do
+        sample :drum_cymbal_closed, rate: 0.7
+        sleep 0.25
+        sample :drum_cymbal_closed, rate: 0.8, start: 0.1
+        sleep 0.25
+      end
+      synth :cnoise, sustain: 0.15
+      1.times do
+        sleep 0.25
+        sample :drum_cymbal_closed, rate: 0.8, start: 0.1
+        sleep 0.25
+      end
     end
   end
 end
