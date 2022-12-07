@@ -1,0 +1,47 @@
+use_bpm 100
+
+mel1 = ring(69,69,76,76,74,72,71,69,67,69,71,72,74,76)
+mel2 = ring(76,77,74,76,77,79,81,76,74,72,69,71,72,74)
+mel3 = ring(72,74,76,77,76,76,74,72,71,69,72,71,69,74)
+mel4 = ring(72,74,76,77,79,81,76,74,72,71,69)
+
+tm1 = [1,1,1,1,1,1,1,1,1,1,1,1,1,3]
+tm2 = [1,1,1,1,1,1,1,1,1,1,1,1,1,2]
+tm3 = [1,1,2,1,1,1,1,1,1,2,0.5,0.5,1,2]
+tm4 = [1,1,1,1,1,1,1,1,1,1,7]
+
+puts mel3.length
+puts tm3.length
+puts tm3.sum
+
+live_loop :melody do
+  tick(:i)
+  mel = [mel1,mel1,mel2,mel3,mel4].ring.look(:i)
+  tm = [tm1,tm1,tm2,tm3,tm4].ring.look(:i)
+  tick_reset(:ii)
+  with_fx :echo, phase: 0.75, decay: 6, mix: 0.8 do
+    tm.length.times do
+      tick(:ii)
+      synth :dsaw, note: mel.look(:ii)
+      sleep tm.ring.look(:ii)*0.5
+    end
+  end
+end
+
+live_loop :basss do
+  with_fx :level, amp: 2 do
+    tick
+    if look==0
+      sleep 0.5
+    else
+      sleep 0
+    end
+    h = 36
+    ##| synth :dsaw, note: 69-h, sustain: 4
+    sleep 4
+    7.times do
+      ##| synth :dsaw, note: scale(60, :major).choose-h, sustain: 4
+      sleep 4
+    end
+  end
+end
