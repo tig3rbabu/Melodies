@@ -1,0 +1,44 @@
+use_bpm 100
+
+mel1 = ring(64,64,64,64,64,64,64,67,60,62,64)
+mel2 = ring(65,65,65,65,65,64,64,64,64,62,62,64,62,67)
+mel3 = ring(65,65,65,65,65,64,64,64,67,67,65,62,60)
+mel4 = ring(55,64,62,60,55,55,55,55,64,62,60,57)
+mel5 = ring(57,65,64,62,59,67,67,65,62,64)
+mel6 = ring(57,65,64,62,67,67,67,67,69,67,65,62,60,67)
+
+tm1 = [1,1,2,1,1,2,1,1,1.5,0.5,4]
+tm2 = [1,1,1.5,0.5,1,1,1.5,0.5,1,1,1,1,2,2]
+tm3 = [1,1,1.5,0.5,1,1,1.5,0.5,1,1,1,1,4]
+tm4 = [1,1,1,1,3,0.5,0.5,1,1,1,1,4]
+tm5 = [1,1,1,1,4,1,1,1.5,0.5,4]
+tm6 = [1,1,1,1,1,1,1,1,1,1,1,1,2,2]
+
+puts mel6.length
+puts tm6.length
+puts tm6.sum
+
+live_loop :melody do
+  tick(:i)
+  mel = [mel1,mel2,mel1,mel3,mel4,mel5,mel4,mel6].ring.look(:i)
+  tm = [tm1,tm2,tm1,tm3,tm4,tm5,tm4,tm6].ring.look(:i)
+  tick_reset(:ii)
+  with_fx :echo, phase: 0.75, decay: 6, mix: 0.8 do
+    tm.length.times do
+      tick(:ii)
+      synth :dsaw, note: mel.look(:ii)+12
+      sleep tm.ring.look(:ii)*0.5
+    end
+  end
+end
+
+live_loop :bass do
+  nn = ring(67,62,60,62,64,67,60,62,67,69,62,64,67,69,62,64).tick(:i)
+  16.times do
+    if spread(5,16).tick(:ii)
+      synth :fm, note: nn-24, depth: 3, release: 1.5
+    end
+    sleep 0.25
+  end
+end
+
