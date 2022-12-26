@@ -1,0 +1,85 @@
+use_bpm 120
+
+bass1 = ring(57,57,59,60,62,59,57,55,53)
+bass2 = ring(57,57,59,60,62,60,62,64,62,60,62,53)
+bass3 = ring(60,55,57,53)
+tb1 = [4,1,1,1,5,1,1,2,16]
+tb2 = [4,1,1,1,4,0.5,0.5,1,1,1,1,16]
+tb3 = [8,8,8,8]
+
+mel1 = ring(64,62,64,60,57,64,64,62,60,64,64,60,57)
+mel2 = ring(64,64,64,60,67,67,64,64,62,60,62,64,62,64,60,57)
+tm1 = [4,4,3,1,20,2,2,2,2,2,1,1,19]
+tm2 = [1,1,1,1,2,9,1,1,2,1,13,4,4,3,1,20]
+
+puts mel1.length
+puts tm1.length
+puts tm1.sum
+
+live_loop :melody do
+  tick(:i)
+  if look(:ii)==0
+    sleep 2
+  else
+    sleep 0
+  end
+  mel = [mel1,mel2].ring.look(:i)
+  tm = [tm1,tm2].ring.look(:i)
+  tick_reset(:ii)
+  with_fx :echo, phase: 0.75, decay: 6, mix: 0.8 do
+    tm.length.times do
+      tick(:ii)
+      synth :dsaw, note: mel.look(:ii)+12
+      sleep tm.ring.look(:ii)*0.5
+    end
+  end
+end
+
+live_loop :bass do
+  tick(:i)
+  bass = [bass1,bass2,bass3,bass2].ring.look(:i)
+  tb = [tb1,tb2,tb3,tb2].ring.look(:i)
+  if tb==tb3
+    m = 6
+  else
+    m = 1
+  end
+  tick_reset(:ii)
+  with_fx :flanger, mix: 1, amp: 2 do
+    tb.length.times do
+      tick(:ii)
+      synth :fm, note: bass.look(:ii)-12, depth: 3, release: m
+      ##| synth :dpulse, note: bass.look(:ii)-24, detune: 0.3, cutoff: 60, amp: 2
+      synth :sine, note: bass.look(:ii)-24, cutoff: 130, amp: 3, release: m
+      sleep tb.ring.look(:ii)*0.5
+    end
+  end
+end
+
+cn1 = [57,55,53,53]
+cn2 = [60,55,57,53]
+ch1 = ['m7',:major,:major7,:major7]
+ch2 = [:major,:major,'m7',:major7]
+
+live_loop :chordetta do
+  tick(:i)
+  if look(:i)==0
+    sleep 1
+  else
+    sleep 0
+  end
+  ch = [ch1,ch1,ch2,ch1].ring.look(:i)
+  cn = [cn1,cn1,cn2,cn1].ring.look(:i)
+  with_fx :gverb, room: 69, release: 8, mix: 0.2, amp: 1.2 do
+    with_fx :slicer, phase: 0.5, wave: 0, mix: 1, amp: 1 do
+      ch.length.times do
+        tick(:ii)
+        synth :zawa, note: chord(cn.ring.look(:ii)+12,ch.ring.look(:ii)), sustain: 2.5, release: 0, amp: 1.5, cutoff: 75
+        ##| synth :organ_tonewheel, note: chord(cn.ring.look(:ii)+0,ch.ring.look(:ii)), attack: 0, sustain: 4, release: 0, amp: 4.5
+        sleep 4
+      end
+    end
+  end
+end
+
+
