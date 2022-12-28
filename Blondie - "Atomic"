@@ -1,0 +1,130 @@
+use_bpm 140
+
+riff1 = ring(62,67,66,64)
+riff2 = ring(62,67,66,69,66,62)
+tr1 = [1,1,3,11]
+tr2 = [1,1,3,6,2,3]
+
+vox1 = ring(66,68,66,64,66,69,68,69,68,71,68,66,59)
+vox2 = ring(66,68,66,64,66,69,69,61,68,69,68,71,68,66,59)
+tv1 = [1,3,2,1,3,14,2,14,2,5,1,1,15]
+tv2 = [1,3,2,1,3,2,1,11,2,14,2,5,1,1,15]
+
+bass1 = ring(64,60,69,62,59)
+bass2 = ring(64,66,62,59)
+ch1 = knit(:minor,1,:major,3,:minor,1)
+ch2 = ring(:major,:minor,'5','5')
+tc1 = [8,8,8,4,4]
+tc2 = [8,8,8,8]
+
+a = 1
+
+puts vox2.length
+puts tv2.length
+puts tv2.sum
+
+live_loop :vox do
+  tick(:i)
+  if look(:i)==0
+    sleep 5.5
+  else
+    sleep 0
+  end
+  vox = [vox1,vox2].ring.look(:i)
+  tv = [tv1,tv2].ring.look(:i)
+  tick_reset(:ii)
+  with_fx :slicer, phase: 0.5, wave: 0, mix: 1 do
+    with_fx :flanger, mix: 0.8 do
+      ee = synth :prophet, note: vox[0]+12, sustain: (tv.sum*0.5)-8, release: 10
+      tv.length.times do
+        tick(:ii)
+        control ee, note: vox.look(:ii)+12
+        sleep tv.ring.look(:ii)*0.5
+      end
+    end
+  end
+end
+
+live_loop :riffy do
+  tick(:i)
+  riff = [riff1,riff1,riff1,riff2].ring.look(:i)
+  tr = [tr1,tr1,tr1,tr2].ring.look(:i)
+  tick_reset(:ii)
+  with_fx :echo, phase: 0.75, decay: 6, mix: 0.6 do
+    tr.length.times do
+      tick(:ii)
+      ##| synth :dsaw, note: riff.look(:ii)
+      sleep tr.ring.look(:ii)*0.5
+    end
+  end
+end
+
+
+
+live_loop :choreetts do
+  bass = [bass1,bass2][a]
+  ch = [ch1,ch2][a]
+  tc = [tc1,tc2][a]
+  tick(:i)
+  if look(:i)==0
+    sleep 2.5
+  else
+    sleep 0
+  end
+  tc.length.times do
+    tick(:ii)
+    synth :dsaw, note: chord(bass.look(:ii),ch.look(:ii)), sustain: tc.ring.look(:ii), release: 0
+    sleep tc.ring.look(:ii)
+  end
+end
+
+live_loop :bass do
+  bass = [bass1,bass2][a]
+  tc = [tc1,tc2][a]
+  tick(:i)
+  if look(:i)==0
+    sleep 2.5
+  else
+    sleep 0
+  end
+  with_fx :gverb, room: 69, release: 4, mix: 0.2 do
+    tc.ring.look(:i).times do
+      tick(:ii)
+      synth :dsaw, note: bass.look(:i)-36+ring(0,12).look(:ii), release: 0.5, amp: 2
+      sleep 1
+    end
+  end
+end
+
+live_loop :kick do
+  4.times do
+    sample :bd_haus, amp: 5, cutoff: 90
+    sleep 1
+  end
+end
+
+live_loop :sn1 do
+  sleep 0.5
+  sample :drum_cymbal_closed, amp: 3
+  sleep 0.5
+end
+
+live_loop :sn2 do
+  16.times do
+    sample :drum_cymbal_closed, rate: 3, amp: 2
+    sleep 0.25
+    sample :drum_cymbal_closed, rate: 4, amp: 1.5
+    sleep 0.25
+  end
+end
+
+live_loop :sn3 do
+  sleep 1
+  sample :elec_snare, amp: 3, finish: 0.2
+  synth :cnoise, release: 1, amp: 2
+  sleep 1
+end
+
+
+
+
