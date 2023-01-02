@@ -95,6 +95,7 @@ live_loop :bass do
     end
   end
 end
+sleep 0.5
 
 live_loop :kick do
   4.times do
