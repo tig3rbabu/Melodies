@@ -1,0 +1,95 @@
+use_bpm 140
+
+
+mel1 = ring(62,60,64,64,62,60,64,62,60,62,64,62,60,
+            57,57,60,62,64,62,60,55,55,57,60,60)
+tm1 = [2,2,3,1,2,2,4,2,2,3,1,2,2,4,2,2,3,1,2,2,3,1,2,2,11]
+
+mel2 = ring(62,62,60,64,64,62,60,64,64,62,60,62,64,62,60,57)
+mel3 = ring(57,60,62,64,62,60,57,55,55,57,60,60)
+tm2 = [1,2,2,3,1,2,2,3,1,2,2,3,1,2,2,4]
+tm3 = [2,2,3,1,2,2,1,2,1,2,4,10]
+tm4 = [2,2,3,1,2,2,1,2,1,2,4,10]
+
+puts tm2.sum
+
+live_loop :melody do
+  tick(:i)
+  mel = [mel1,mel2,mel3,mel3].ring.look(:i)
+  tt = [tm1,tm2,tm3,tm3].ring.look(:i)
+  tick_reset(:ii)
+  with_fx :echo, phase: 0.75, decay: 6, mix: 0.8 do
+    tt.length.times do
+      tick(:ii)
+      synth :dsaw, note: mel.look(:ii)
+      sleep tt.ring.look(:ii)*0.5
+    end
+  end
+end
+
+bass1 = ring(60,69,62,67,60)
+bass2 = ring(60,69,58,67,65,62,67,60)
+tb1 = [8,8,4,4,8]
+tb2 = [8,8,4,4,8,4,4,8]
+chn1 = ring(60,69,62,62,60)
+chn2 = ring(60,69,62,62,60,62,62,60)
+cht1 = ring(:major,'m7','m7','m7',:major)
+cht2 = ring(:major,'m7','m7','m7','m7','m7','m7',:major)
+
+
+live_loop :bass do
+  tick(:i)
+  if look(:i)==0
+    sleep 2
+  else
+    sleep 0
+  end
+  bass = [bass1,bass2].ring.look(:i)
+  tb = [tb1,tb2].ring.look(:i)
+  chn = [chn1,chn2].ring.look(:i)
+  cht = [cht1,cht2].ring.look(:i)
+  tick_reset(:ii)
+  tb.length.times do
+    tick(:ii)
+    tt = tb.ring.look(:ii)
+    synth :fm,note: bass.look(:ii)-24, sustain: tt, release: 0, depth: 2, amp: 2
+    synth :beep,note: chord(chn.look(:ii)-0,cht.look(:ii)), sustain: tt, release: 0
+    sleep tt
+  end
+end
+
+live_loop :chords do
+  tick(:i)
+  if look(:i)==0
+    sleep 2
+  else
+    sleep 0
+  end
+  bass = [bass1,bass2].ring.look(:i)
+  tb = [tb1,tb2].ring.look(:i)
+  chn = [chn1,chn2].ring.look(:i)
+  cht = [cht1,cht2].ring.look(:i)
+  tick_reset(:ii)
+  with_fx :gverb, room: 69, release: 8, mix: 0.2 do
+    tb.length.times do
+      tick(:ii)
+      tt = tb.ring.look(:ii)
+      sleep 2
+      synth :dsaw, note: chord(chn.look(:ii)+12,cht.look(:ii)), sustain: 1, release: 0, amp: 4
+      sleep tt-2
+    end
+  end
+end
+
+##| live_loop :kick do
+##|   sample :bd_haus, cutoff: 90, amp: 4
+##|   sample :drum_bass_hard, amp: 2
+##|   sleep 2
+##| end
+
+##| live_loop :snare, sync: :kick do
+##|   sleep 1
+##|   synth :cnoise, release: 0.75, amp: 2
+##|   sample :drum_snare_hard, amp: 1.7
+##|   sleep 1
+##| end
