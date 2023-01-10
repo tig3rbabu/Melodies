@@ -1,0 +1,68 @@
+use_bpm 110
+
+mel1 = ring(59,59,59,59,61,62,61,57,57,62,62,61,59,59)
+mel2a = ring(59,59,59,59,61,62,61,57,57,57,57,62,62,61,59,59)
+mel2b = ring(59,59,59,59,61,62,61,57,57,57,57,62,62,64,59,59)
+mel3 = ring(59,66,66,66,66,64,61,57,57,62,62,62,64,64,64,59,59)
+tm1 = [1,1,1,2,1,1,1,10,1,1,1,1,2,8]
+tm2 = [1,1,1,2,1,1,1,8,1,1,1,1,1,1,1,5]
+tm3a = [1,1,6,1,1,2,1,1,6,1,1,1,1,1,1,1,5]
+tm3b = [1,1,6,1,1,2,1,1,6,1,1,1,1,1,1,1,9]
+
+puts mel3.length
+puts tm3a.length
+puts tm3a.sum
+
+live_loop :melody do
+  tick(:i)
+  if look(:i)==0
+    sleep 0.5
+  else
+    sleep 0
+  end
+  mel = [mel1,mel2a,mel3,mel3,mel1,mel2b,mel3,mel3].ring.look(:i)
+  tt = [tm1,tm2,tm3a,tm3b,tm1,tm2,tm3a,tm3b].ring.look(:i)
+  tick_reset(:ii)
+  with_fx :echo, phase: 0.75, decay: 6, mix: 0.8 do
+    tt.length.times do
+      tick(:ii)
+      synth :dsaw, note: mel.look(:ii)+12
+      sleep tt.ring.look(:ii)*0.5
+    end
+  end
+end
+
+pluk = ring(59,59,59,59,59,59,59,62,61,57)
+tp = [2,1,2,1,1,1,2,2,2,2]
+
+live_loop :tuntun do
+  with_fx :echo, phase: 0.75, decay: 4, mix: 0.4 do
+    tick
+    synth :dsaw, note: pluk.look+12, release: 0.25
+    sleep tp.ring.look*0.25
+  end
+end
+
+chb = ring(59,57,55,59)
+chn = ring(:minor,:major,:major,:minor)
+
+live_loop :pian do
+  with_fx :slicer, wave: 0.5, wave: 2, mix: 0.8 do
+    tick
+    synth :beep, note: chord(chb.look+12,chn.look), release: 4, amp: 3
+    synth :zawa, note: chord(chb.look+0,chn.look), sustain: 4, release: 0,
+      amp: 1.5, cutoff: 75, range: 12
+    sleep 4
+  end
+end
+
+live_loop :bass do
+  tick
+  synth :fm, note: 59-12-ring(12,0).look, release: 0.5, amp: 2
+  sleep 0.5
+end
+
+live_loop :kick do
+  sample :bd_haus, cutoff: 90, amp: 3
+  sleep 1
+end
