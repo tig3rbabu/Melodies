@@ -1,0 +1,58 @@
+use_bpm 90
+
+
+mel1 = ring(67,67,66,62,62,59,62,64,62,59,64,67,67,67,66,62,62,59,60,59,57,55)
+mel2 = ring(67,67,66,62,62,59,62,64,62,59,69,69,69,69,69,71,72,71,69,67)
+mel3 = ring(69,69,67,69,69,69,71,72,71,69,67,71)
+chmel1a = ring(62,71,71,69,67,67,69,67,69,67,71,69,71)
+chmel1b = ring(62,71,71,69,67,67,67,69,67,69,67,71,69,71)
+chmel2 = ring(64,64,67,71,71,67,62,64,71,69,67,71,67,67)
+
+tm1 = [1,3,2,1,3,2,3,3,1,12,1,2,1,1,2,2,1,3,3,3,1,13]
+tm2a = [2,1,3,1,3,2,3,3,1,11,2,2,1,3,2,4,2,4,1,13]
+tm2b = [2,1,3,1,3,2,3,3,1,11,2,2,1,3,2,4,2,4,1,11]
+tm3 = [2,2,1,3,2,2,2,4,4,2,2,7]
+tchm1a = [1,2,2,2,1,9,2,1,2,2,1,2,4]
+tchm1b = [1,2,1,2,2,8,1,2,1,2,2,1,2,4]
+tchm2a = [2,1,3,2,1,2,1,2,4,2,2,2,4,5]
+tchm2b = [2,1,3,2,1,2,1,2,4,2,2,2,4,6]
+
+
+live_loop :melody do
+  tick(:i)
+  if look(:i)==0
+    sleep 1
+  else
+    sleep 0
+  end
+  mel = [mel1,mel2,mel1,mel2,mel3,chmel1a,chmel2,chmel1b,chmel2].ring.look(:i)
+  tm = [tm1,tm2a,tm1,tm2b,tm3,tchm1a,tchm2a,tchm1b,tchm2b].ring.look(:i)
+  tick_reset(:ii)
+  with_fx :echo, phase: 0.75, decay: 6, mix: 0.8 do
+    tm.length.times do
+      tick(:ii)
+      synth :dsaw, note: mel.look(:ii)+0, release: 1
+      sleep tm.ring.look(:ii)*0.25
+    end
+  end
+end
+
+bass1 = ring(55,60)
+bass2 = ring(62,60)
+bass3 = ring(55,62,64,60)
+
+
+live_loop :bass do
+  tick(:i)
+  bass = [bass1,bass1,bass1,bass2,bass1,bass1,bass1,bass2,bass2,bass3,bass3].ring.look(:i)
+  tick_reset(:ii)
+  with_fx :slicer, phase: 0.5, wave: 0, mix: 1, amp: 1.5 do
+    bass.length.times do
+      tick(:ii)
+      synth :dsaw, note: bass.look(:ii)-24, sustain: 4, release: 0
+      synth :dsaw, note: bass.look(:ii)-36, sustain: 4, release: 0
+      synth :fm, note: bass.look(:ii)-12, sustain: 4, release: 0
+      sleep 4
+    end
+  end
+end
