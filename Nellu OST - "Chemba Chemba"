@@ -1,0 +1,87 @@
+use_bpm 140
+
+mel1 = ring(71,69,69,64,67,69,71,74,73,71)
+mel2 = ring(71,69,69,69,64,67,69,69,64,67,69,69,64,67,69,69,64,67)
+mel3 = ring(69,71,69,69,71,69,73,69,71,69,69,71,69,73,69,71,69,
+            73,73,71,71,71,69,69,71,69,67)
+mel4 = ring(69,71,69,69,71,69,69,71,69,69,71,69,69,71,69,69,69,69,69)
+
+tm1 = [2,13,2,1,9,1,1,1,1,1]
+tm2 = [2,13,1,1,1,5,1,1,1,5,1,1,1,5,1,1,1,5]
+tm3 = [1,1,1,1,2,1,1,1,1,1,1,2,1,1,1,1,1,1.5,1.5,1,1.5,1.5,1,1.5,0.25,0.25,4]
+tm4 = [1,1,2,1,1,2,1,1,2,1,1,2,1,1,2,2,2,2,6]
+
+live_loop :melody do
+  tick(:i)
+  mel = [mel1,mel2,mel3,mel4].ring.look(:i)
+  tm = [tm1,tm2,tm3,tm4].ring.look(:i)
+  tick_reset(:ii)
+  with_fx :echo, phase: 0.75, decay: 6, mix: 0.8 do
+    tm.length.times do
+      tick(:ii)
+      synth :dsaw, note: mel.look(:ii)+0, amp: 1.5
+      ##| synth :fm, note: mel.look(:ii)+0, amp: 1, depth: 15
+      sleep tm.ring.look(:ii)*0.5
+    end
+  end
+end
+
+live_loop :bass do
+  with_fx :bitcrusher, sample_rate: 3000, mix: 1 do
+    with_fx :slicer, phase: 0.25, wave: 0, mix: 1 do
+      tick
+      if look==0
+        sleep 1
+      else
+        sleep 0
+      end
+      synth :dsaw, note: ring(69,67,69).look-36, sustain: 6
+      synth :dsaw, note: ring(69,67,69).look-24, sustain: 6
+      synth :fm, note: ring(69,67,69).look-24, sustain: 6
+      sleep 8
+    end
+  end
+end
+
+live_loop :chord, sync: :bass do
+  with_fx :gverb, room: 69, release: 8, mix: 0.7 do
+    tick
+    sleep 3
+    synth :dsaw, note: chord(69, '9sus4'), release: 2, amp: 2, cutoff: 95
+    sleep 5
+  end
+end
+
+live_loop :arpeg do
+  tick(:i)
+  with_fx :gverb, room: 69, release: 2, mix: 0.2 do
+    if look(:i)==0
+      sleep 1
+    else
+      sleep 0
+    end
+    16.times do
+      tick
+      ##| synth :dsaw, note: scale(69-12, :major_pentatonic, num_octaves: 3).look, release: 0.5, amp: 1
+      sleep 0.25
+    end
+  end
+end
+
+live_loop :kick do
+  tick
+  if look==0
+    sleep 1
+  else
+    sleep 0
+  end
+  sample :bd_haus, amp: 5
+  sleep 2
+  with_fx :gverb, room: 69, release: 2, mix: 0.2 do
+    synth :cnoise, release: 0.75, amp: 1
+    sample :elec_snare, amp: 2, finish: 0.1, rate: 0.8
+    sleep 2
+  end
+end
+
+
