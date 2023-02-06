@@ -1,0 +1,58 @@
+use_bpm 120
+
+mel0 = ring(57)
+mel1 = ring(64,62,64,57,65,64,65,64,62,65,64,65,57,59,62,60,62,60,59,62,60)
+mel2 = ring(59,60,62,60,62,64,62,60,59,57,65,64,64,65,64,62,64)
+tm0 = [6]
+tm1 = [1,1,4,10,1,1,2,2,10,1,1,4,4,6,1,1,2,2,2,2,6]
+tm2 = [1,1,6,1,1,2,2,2,2,4,4,8,3,3,1,1,16]
+
+
+puts mel2.length
+puts tm2.length
+puts tm2.sum
+
+live_loop :melody do
+  tick(:i)
+  mel = [mel0,mel1,mel1,mel2].ring.look(:i)
+  tm = [tm0,tm1,tm1,tm2].ring.look(:i)
+  tick_reset(:ii)
+  with_fx :echo, phase: 0.75, decay: 6, mix: 0.8 do
+    tm.length.times do
+      tick(:ii)
+      synth :dsaw, note: mel.look(:ii)
+      sleep tm.ring.look(:ii)*0.25
+    end
+  end
+end
+
+bass = [57,55,59,62]
+
+live_loop :bass do
+  tick
+  synth :dsaw, note: bass.ring.look-24, sustain: 3, release: 0
+  synth :dsaw, note: bass.ring.look-36, sustain: 3, release: 0
+  sleep 4
+end
+
+live_loop :kick do
+  sample :bd_haus, amp: 3
+  sleep 0.25
+  3.times do
+    sample :drum_cymbal_closed, rate: 4
+    sleep 0.25
+  end
+end
+
+live_loop :snare do
+  sleep 1
+  sample :sn_dub, amp: 2
+  sleep 1
+end
+
+live_loop :offbeat do
+  sleep 0.5
+  sample :sn_dub, amp: 1.5, rate: 3
+  sleep 0.5
+end
+
