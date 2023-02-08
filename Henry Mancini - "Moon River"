@@ -16,26 +16,52 @@ live_loop :melody do
   mel = [mel1,mel2,mel1,mel3].ring.look(:i)
   tm = [tm1,tm2,tm1,tm3].ring.look(:i)
   tick_reset(:ii)
-  with_fx :echo, phase: 0.75, decay: 6, mix: 0.8 do
+  with_fx :echo, phase: 0.75, decay: 6, mix: 0.4 do
     tm.length.times do
       tick(:ii)
-      synth :dsaw, note: mel.look(:ii)+12
+      ##| synth :dsaw, note: mel.look(:ii)+12, release: 0.75, amp: 0.6, depth: 12, cutoff: 120
+      synth :fm, note: mel.look(:ii)+12, release: 0.75, amp: 0.6, depth: 12, cutoff: 100
+      synth :fm, note: mel.look(:ii)+0, release: 0.75, amp: 0.6, depth: 10, cutoff: 100
       sleep tm.ring.look(:ii)*0.5
     end
   end
 end
 
-bass1 = ring(60,69,65,60,65,60,59,64,69,60,65,58,69,59,64,67)
-bass2 = ring(60,69,65,60,65,60,59,64,69,69,66,65,60,65,60,65,60,69,62,67,60)
+bass1 = ring(60,69,65,60,65,60,59,64)
+bass2 = ring(69,60,65,58,69,59,64,62)
+bass3 = ring(69,69,66,65,60,65,60,65,60,69,62,60,67)
+ch1 = ring(:major,:minor,:major,:major,:major,:major,'m7-5','7')
+ch2 = ring(:minor,'7',:major,'9',:minor,'m7-5','m7','m7')
+ch3 = ring(:minor,:minor,'m7-5','13',:major,:major,:major,:major,:major,:minor,'m7',:major,'9')
 
 live_loop :bass do
   tick(:i)
-  bass = [bass1,bass2].ring.look(:i)
+  bass = [bass1,bass2,bass1,bass3].ring.look(:i)
   tick_reset(:ii)
-  bass.length.times do
-    tick(:ii)
-    synth :dsaw, note: bass.look(:ii)-24, sustain: 3, release: 0
-    sleep 3
+  with_fx :flanger, mix: 1 do
+    bass.length.times do
+      tick(:ii)
+      synth :fm, note: bass.look(:ii)-24, attack: 3, sustain: 0, release: 0, depth: 2
+      sleep 3
+    end
   end
 end
 
+live_loop :chord do
+  tick(:i)
+  bass = [bass1,bass2,bass1,bass3].ring.look(:i)
+  ch = [ch1,ch2,ch1,ch3].ring.look(:i)
+  tick_reset(:ii)
+  with_fx :gverb, room: 69, release: 4, mix: 0.2 do
+    with_fx :flanger, mix: 1 do
+      ff = synth :organ_tonewheel, note: chord(bass[0]+0, ch[0]), note_slide: 0.5, sustain: bass.length*3, release: 0, amp: 3
+      bass.length.times do
+        tick(:ii)
+        control ff, note: chord(bass.look(:ii)+0, ch.look(:ii))
+        sleep 1
+        synth :zawa, note: chord(bass.look(:ii)+0, ch.look(:ii)), sustain: 0, release: 1.5, amp: 1, cutoff: 85, range: 12
+        sleep 2
+      end
+    end
+  end
+end
