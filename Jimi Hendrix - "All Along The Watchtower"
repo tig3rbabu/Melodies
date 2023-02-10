@@ -1,0 +1,60 @@
+use_bpm 100
+
+mel1 = ring(69,69,69,67,69,67,69,72,67,69,67,69,72,67,69,69,69)
+mel2 = ring(69,69,69,67,72,69,67,69,72,67,69,69)
+mel3 = ring(74,72,74,72,76,69,72,67,69,72,69,69)
+mel4 = ring(74,74,72,74,72,76,69,72,67,69,69,72,67,69,69)
+tm1 = [1,1,1,1,1,1,1,1,1,7,1,1,1,1,1,1,10]
+tm2 = [1,1,1,1,1,11,1,2,1,1,1,11]
+tm3 = [1,1,1,3,1,1,7,1,2,1,1,11]
+tm4 = [1,1,1,1,2,2,1,7,1,1,1,1,1,1,9]
+
+mel5 = ring(79,76,74,72,74,74,69,72,67,69,72,69,69)
+mel6 = ring(69,69,69,67,69,72,67,69,74,74,74,69,72)
+mel7 = ring(76,76,74,72,74,74,69,72,67,69,72,69,69)
+mel8 = ring(69,69,69,67,69,72,69,69,69,79,76,74,72,76,69)
+tm5 = [2,2,1,1,1,2,1,7,1,2,1,1,11]
+tm6 = [1,1,1,1,2,2,1,7,1,2,1,2,9]
+tm7 = [2,2,1,1,2,1,1,7,1,2,1,2,10]
+tm8 = [1,1,1,1,1,1,7,1,1,3,1,1,1,1,10]
+
+puts mel8.length
+puts tm8.length
+puts tm8.sum
+
+live_loop :melody, delay: 2 do
+  tick(:i)
+  mel = [mel1,mel2,mel3,mel4,mel5,mel6,mel7,mel8].ring.look(:i)
+  tm = [tm1,tm2,tm3,tm4,tm5,tm6,tm7,tm8].ring.look(:i)
+  tick_reset(:ii)
+  with_fx :echo, phase: 0.75, decay: 6, mix: 0.6 do
+    tm.length.times do
+      tick(:ii)
+      synth :dsaw, note: mel.look(:ii)
+      sleep tm.ring.look(:ii)*0.5
+    end
+  end
+end
+
+bass = ring(67,67,69,69,69,69,67,67,65,65,65,65)
+tb = [1,1,1,1,1,3]
+
+live_loop :bass do
+  bass.length.times do
+    tick
+    synth :fm, note: bass.look-24, release: 0.5
+    with_fx :distortion, distort: 0.999, mix: 0.5, amp: 0.5 do
+      synth :dsaw, note: chord(bass.look-24,'5'), release: 1
+    end
+    sleep tb.ring.look*0.5
+  end
+end
+
+live_loop :backbeat, delay: 0.5 do
+  with_fx :gverb, room: 69, release: 4, mix: 0.3 do
+    sleep 2
+    synth :cnoise, release: 0.75
+    sample :elec_snare, rate: 0.8
+    sleep 2
+  end
+end
