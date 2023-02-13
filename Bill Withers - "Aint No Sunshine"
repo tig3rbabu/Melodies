@@ -1,0 +1,81 @@
+use_bpm 80
+
+bass1 = ring(69,64,67,69)
+bass2 = ring(64,62)
+tb1 = [4,2,2,8]
+tb2 = [8,8]
+
+mel1a = ring(64,67,69,72,71,67,69,69.3,69)
+mel1b = ring(64,67,69,72,71,67,67,69,69.3,69)
+mel2 = ring(69,69,72,76,74,76,74,76,74,69,74,72,69,67,69,67,69,72,74,72,69,67,69,69.5,69)
+tm1a = [1,2,2,3,2,2,2,1,5+12]
+tm1b = [1,2,2,2,2,2,1,1,1,6+12]
+tm2 = [1,2,2,3,1,1,1,1,5,1,1,3,2,2,1,1,4,1,1,6,1,2,1,1,3+16]
+
+puts mel2.length
+puts tm2.length
+puts tm2.sum
+
+live_loop :melody do
+  tick(:i)
+  mel = [mel1a,mel1b,mel2].ring.look(:i)
+  tm = [tm1a,tm1b,tm2].ring.look(:i)
+  tick_reset(:ii)
+  with_fx :echo, phase: 0.75, decay: 6, mix: 0.8 do
+    tm.length.times do
+      tick(:ii)
+      synth :dsaw, note: mel.look(:ii)
+      sleep tm.ring.look(:ii)*0.25
+    end
+  end
+end
+
+live_loop :bass, delay: 3 do
+  tick(:i)
+  bass = [bass1,bass1,bass2,bass1].ring.look(:i)
+  tb = [tb1,tb1,tb2,tb1].ring.look(:i)
+  tick_reset(:ii)
+  with_fx :wobble, phase: 0.75, cutoff_max: 90, cutoff_min: 50, wave: 0, mix: 1, amp: 1.2 do
+    with_fx :flanger, mix: 1 do
+      tb.length.times do
+        tick(:ii)
+        synth :fm, note: bass.look(:ii)-24, release: 1.5, depth: 2
+        synth :fm, note: bass.look(:ii)-24, release: 1.5, depth: 3
+        synth :dsaw, note: bass.look(:ii)-24, release: 1.5, detune: 0.2
+        synth :dsaw, note: bass.look(:ii)-36, release: 1.5, detune: 0.2
+        sleep tb.ring.look(:ii)*0.5
+      end
+    end
+  end
+end
+
+str1 = ring(64,69,71,67,64)
+ts1 = [2,2,2,2,8]
+
+live_loop :strings, delay: 3 do
+  2.times do
+    with_fx :gverb, room: 69, release: 3, mix: 0.2 do
+      ts1.length.times do
+        tick
+        ##| synth :supersaw, note: str1.look+0, sustain: 1, amp: 0.3
+        ##| synth :supersaw, note: str1.look+12, sustain: 1, amp: 0.3
+        sleep ts1.ring.look*0.5
+      end
+    end
+  end
+  sleep 8
+  with_fx :gverb, room: 69, release: 3, mix: 0.2 do
+    ts1.length.times do
+      tick
+      ##| synth :supersaw, note: str1.look+0, sustain: 1, amp: 0.3
+      ##| synth :supersaw, note: str1.look+12, sustain: 1, amp: 0.3
+      sleep ts1.ring.look*0.5
+    end
+  end
+end
+
+live_loop :backbeat do
+  sleep 1
+  sample :bd_haus, amp: 5, cutoff: 90
+  sleep 1
+end
