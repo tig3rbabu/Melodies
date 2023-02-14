@@ -42,34 +42,49 @@ live_loop :bass, delay: 3 do
         synth :fm, note: bass.look(:ii)-24, release: 1.5, depth: 2
         synth :fm, note: bass.look(:ii)-24, release: 1.5, depth: 3
         synth :dsaw, note: bass.look(:ii)-24, release: 1.5, detune: 0.2
-        synth :dsaw, note: bass.look(:ii)-36, release: 1.5, detune: 0.2
+        synth :saw, note: bass.look(:ii)-36, release: 1.5
         sleep tb.ring.look(:ii)*0.5
       end
     end
   end
 end
 
-str1 = ring(64,69,71,67,64)
-ts1 = [2,2,2,2,8]
-
-live_loop :strings, delay: 3 do
-  2.times do
-    with_fx :gverb, room: 69, release: 3, mix: 0.2 do
-      ts1.length.times do
-        tick
-        ##| synth :supersaw, note: str1.look+0, sustain: 1, amp: 0.3
-        ##| synth :supersaw, note: str1.look+12, sustain: 1, amp: 0.3
-        sleep ts1.ring.look*0.5
+live_loop :chords, delay: 3 do
+  tick(:i)
+  bass = [bass1,bass1,bass2,bass1].ring.look(:i)
+  tb = [tb1,tb1,tb2,tb1].ring.look(:i)
+  tick_reset(:ii)
+  with_fx :gverb, room: 69, release: 4, mix: 0.2, amp: 1 do
+    with_fx :slicer, phase: 1, wave: 0, phase_offset: 0.5, mix: 1, amp: 3 do
+      with_fx :flanger, mix: 1 do
+        tb.length.times do
+          tick(:ii)
+          synth :beep, note: chord(bass.look(:ii)+0, '5'), release: 2
+          sleep tb.ring.look(:ii)*0.5
+        end
       end
     end
   end
-  sleep 8
-  with_fx :gverb, room: 69, release: 3, mix: 0.2 do
-    ts1.length.times do
-      tick
-      ##| synth :supersaw, note: str1.look+0, sustain: 1, amp: 0.3
-      ##| synth :supersaw, note: str1.look+12, sustain: 1, amp: 0.3
-      sleep ts1.ring.look*0.5
+end
+
+str1 = ring(64,69,71,67,64)
+str2 = ring(67,65,64,62,62,64)
+ts1 = [2,2,2,2,8]
+ts2 = [8,8,4,2,2,8]
+
+live_loop :strings, delay: 3 do
+  tick(:i)
+  str = [str1,str1,str2].ring.look(:i)
+  ts = [ts1,ts1,ts2].ring.look(:i)
+  tick_reset(:ii)
+  with_fx :gverb, room: 69, release: 3, mix: 0.2, amp: 0.8 do
+    with_fx :slicer, phase: 0.125, wave: 3, phase_offset: 0.5, mix: 0.6 do
+      ss = synth :dtri, note: str[0]+12, note_slide: 0.25, attack: 1, amp: 0.6, sustain: ts.sum*0.5-3, cutoff: 120, detune: 0.2
+      ts.length.times do
+        tick(:ii)
+        control ss, note: str.look(:ii)+12
+        sleep ts.ring.look(:ii)*0.5
+      end
     end
   end
 end
@@ -78,4 +93,15 @@ live_loop :backbeat do
   sleep 1
   sample :bd_haus, amp: 5, cutoff: 90
   sleep 1
+end
+
+live_loop :sn do
+  with_fx :gverb, room: 69, release: 7, mix: 0.3, amp: 0.8 do
+    with_fx :echo, phase: [0.75,0.5,0.25].choose, decay: 4, mix: 0.4 do
+      sleep 2
+      synth :cnoise, release: 0.5
+      sample :drum_snare_hard, rate: 0.75
+      sleep 2
+    end
+  end
 end
