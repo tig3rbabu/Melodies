@@ -1,0 +1,77 @@
+use_bpm 92
+
+mel1 = ring(66,66,66,66,66,63,63,64,66,66,71,70,68)
+mel2 = ring(68,68,68,66,66,66,66,61,61,63,64,64,64,64,64,63,59,61,64,63,59)
+mel3 = ring(71,71,70,71,71,71,71,70,70,70,70,68,68,68,68,70,68,66,66,63,66,66,64,63,61,59)
+mel4 = ring(71,70,71,71,71,71,70,70,68,66,71,70,71,73,75,76,75,73,71,73,71,71,71,70,71)
+tm1 = [2,2,2,1,2,3,2,2,2,2,2,2,4]
+tm2 = [2,1,2,3,2,1,2,5,1,1,1,2,3,1,2,3,2,2,2,1,7]
+tm3 = [2,2,2,4,2,1,2,3,2,1,2,3,2,1,3,2,2,1,5,2,2,8,4,2,2,12]
+tm4 = [2,1,13,2,1,2,3,2,1,5,2,1,13,2,1,3,2,2,1,3,1,1,1,3,16]
+
+puts mel4.length
+puts tm4.length
+puts tm4.sum
+
+live_loop :melody do
+  tick(:i)
+  mel = [mel1,mel2,mel3,mel4].ring.look(:i)
+  tm = [tm1,tm2,tm3,tm4].ring.look(:i)
+  tick_reset(:ii)
+  with_fx :echo, phase: 0.75, decay: 6, mix: 0.7 do
+    tm.length.times do
+      tick(:ii)
+      synth :dsaw, note: mel.look(:ii)
+      sleep tm.ring.look(:ii)*0.25
+    end
+  end
+end
+
+bass1 = ring(59,56,54,54,54,59,56,54,52,59,54,52,54,59)
+ch1 = ring(:major,:minor,:major,'7','6',:major,:minor,:major,:major,:major,:major,:major,:major,:major)
+tb1 = [12,4,8,4,4,8,4,4,8,4,4,2,2,8]
+bass2 = ring(56,51,56,54,52,59)
+ch2 = ring(:minor,:minor,:minor,:major,:major,:major)
+tb2 = [8,8,8,4,4,8]
+
+##| puts mel3.length
+##| puts tm3.length
+puts tb2.sum
+
+live_loop :bass do
+  tick(:i)
+  bass = [bass1,bass2].ring.look(:i)
+  tb = [tb1,tb2].ring.look(:i)
+  tick_reset(:ii)
+  with_fx :slicer, phase: 0.5, wave: 0, mix: 0 do
+    tb.length.times do
+      tick(:ii)
+      tt = tb.ring.look(:ii)*0.5
+      synth :dsaw, note: bass.look(:ii)-24, sustain: tt, release: 0, amp: 2.5
+      sleep tt
+    end
+  end
+end
+
+live_loop :chordy do
+  tick(:i)
+  bass = [bass1,bass2].ring.look(:i)
+  ch = [ch1,ch2].ring.look(:i)
+  tb = [tb1,tb2].ring.look(:i)
+  tick_reset(:ii)
+  with_fx :gverb, room: 69, release: 2, mix: 0.2 do
+    tb.length.times do
+      tick(:ii)
+      tt = tb.ring.look(:ii)*0.5
+      rr = tt/0.25
+      rr.times do
+        tick(:iii)
+        synth :organ_tonewheel, note: chord(bass.look(:ii)+12,ch.look(:ii)).reverse.look(:iii), sustain: 0, release: 0.125, amp: 5
+        sleep 0.25
+      end
+    end
+  end
+end
+
+
+
