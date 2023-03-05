@@ -21,7 +21,7 @@ live_loop :melody do
   with_fx :echo, phase: 0.75, decay: 6, mix: 0.7 do
     tm.length.times do
       tick(:ii)
-      synth :dsaw, note: mel.look(:ii)
+      synth :dsaw, note: mel.look(:ii), release: 0.5
       sleep tm.ring.look(:ii)*0.25
     end
   end
@@ -47,7 +47,8 @@ live_loop :bass do
     tb.length.times do
       tick(:ii)
       tt = tb.ring.look(:ii)*0.5
-      synth :dsaw, note: bass.look(:ii)-24, sustain: tt, release: 0, amp: 2.5
+      synth :fm, note: bass.look(:ii)-12, sustain: tt, release: 0, amp: 1.5
+      synth :fm, note: bass.look(:ii)-24, sustain: tt, release: 0, amp: 1, depth: 2
       sleep tt
     end
   end
@@ -72,6 +73,4 @@ live_loop :chordy do
     end
   end
 end
-
-
 
