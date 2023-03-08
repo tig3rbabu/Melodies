@@ -1,0 +1,48 @@
+use_bpm 86
+
+mel1 = ring(55,57,59,55,57,59,62,62,64,60,57,62,59,55,57)
+mel2 = ring(59,60,62,55,66,64,59,60,62,55,62,60,55,57,59,55,59,57,55)
+mel3 = ring(64,64,64,64,62,64,64,64,64,62,62,64,64,64,62,60,62)
+mel4 = ring(61,61,61,57,59,62,61,57,59,62,61,61,61,64,62)
+tm1 = [2,2,1,2,1,2,2,4,1,1,2,1,1,2,8]
+tm2 = [1,1,1,1,2,2,1,1,1,1,2,2,1,1,1,1,2,2,8]
+tm3 = [1,1,1,1,4,1,1,1,1,3,1,2,1,1,2,2,8]
+tm4 = [1,1,1,1,2,4,1,1,2,4,1,1,2,2,8]
+
+live_loop :melody do
+  tick(:i)
+  mel = [mel1,mel2,mel3,mel4].ring.look(:i)
+  tm = [tm1,tm2,tm3,tm4].ring.look(:i)
+  tick_reset(:ii)
+  with_fx :echo, phase: 0.75, decay: 6, mix: 0.7 do
+    tm.length.times do
+      tick(:ii)
+      synth :sine, note: mel.look(:ii)+12
+      sleep tm.ring.look(:ii)*0.5
+    end
+  end
+end
+
+ch1 = ring(55,59,60,55,57,62,55,60,55,60,55,62,55)
+ch2 = ring(60,55,60,55,60,60,55,57,62,57,62,57,62,62)
+chn1 = knit(:major,1,'m7',1,:major,7,:minor,1,:major,3)
+chn2 = knit(:major,5,:minor,1,:major,7,'7sus4',1)
+tc1 = [8,8,4,4,4,4,4,4,4,4,4,4,8]
+tc2 = [4,4,4,4,4,4,8,4,4,4,4,8,4,4]
+
+live_loop :basschord do
+  tick(:i)
+  ch = [ch1,ch2].ring.look(:i)
+  chn = [chn1,chn2].ring.look(:i)
+  tc = [tc1,tc2].ring.look(:i)
+  tick_reset(:ii)
+  with_fx :flanger, mix: 1 do
+    tc.length.times do
+      tick(:ii)
+      tt = tc.ring.look(:ii)*0.5
+      synth :fm, note: ch.look(:ii)-24, sustain: tt, release: 0, depth: 1.5
+      synth :sine, note: chord(ch.look(:ii),chn.look(:ii)), sustain: 0, release: tt, cutoff: 79
+      sleep tt
+    end
+  end
+end
