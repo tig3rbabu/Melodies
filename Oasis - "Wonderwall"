@@ -1,0 +1,89 @@
+use_bpm 85
+
+mel1 = ring(71,69,67,69,67,69,67,69,69,67,69,67,69,67,69,71,67)
+mel2 = ring(71,69,67,69,67,69,69,69,67,69,67,69,67,71,67)
+mel3 = ring(71,74,71,74,74,76,74,71,67,67,69,67,69,71,67,64,64,64,67,64)
+mel4 = ring(67,67,69,64,66,67,69,64,66,67,64)
+mel5 = ring(67,69,64,66,67,69,64,64,71,69,69,71,67,67,67,69,71,69,67,64)
+mel6 = ring(71,71,67,64,67,64,67,64,67,67,71,67,71,72,74,67,71,71,72,71,71,69,67)
+tm1 = [2,3,1,1,1,1,1,2,1,1,1,1,1,1,2,1,11]
+tm2 = [2,3,1,1,1,2,2,1,1,2,1,1,2,1,9]
+tm3 = [1,1,1,3,1,3,1,2,3,1,2,1,1,2,4,1,2,1,2,16+13]
+tm4a = [1,3,1,3,1,3,1,3,1,2,13]
+tm4b = [1,3,1,3,1,3,1,3,1,2,15]
+tm5 = [2,1,3,1,3,1,4,1,3,1,2,1,3,1,1,1,2,2,1,15+13]
+tm6 = [2,3,19,1,2,1,1,1,2,2,3,19,2,2,4,22,2,2,2,4,3,1,32]
+
+puts tm3.sum
+
+live_loop :meldo, delay: 0.5 do
+  tick(:i)
+  mel = [mel1,mel2,mel3,mel4,mel4,mel5,mel6].ring.look(:i)
+  tm = [tm1,tm2,tm3,tm4a,tm4b,tm5,tm6].ring.look(:i)
+  tick_reset(:ii)
+  with_fx :echo, phase: 0.75, decay: 6, mix: 0.7 do
+    tm.length.times do
+      tick(:ii)
+      synth :dsaw, note: mel.look(:ii)-0, release: 0.5
+      sleep tm.ring.look(:ii)*0.25
+    end
+  end
+end
+
+bass1 = ring(64,67,62,69)
+bass2 = ring(60,62,64)
+bass3 = ring(69)
+tb1 = [4,4,4,4]
+tb2 = [4,4,8]
+tb3 = [16]
+
+live_loop :bass do
+  tick(:i)
+  bass = knit(bass1,4,bass2,3,bass3,1,bass1,4).look(:i)
+  tb = knit(tb1,4,tb2,3,tb3,1,tb1,4).look(:i)
+  tick_reset(:ii)
+  with_fx :slicer, phase: 0.125, wave: 0, mix: 0 do
+    with_fx :bitcrusher, sample_rate: 5000, mix: 0 do
+      with_fx :wobble, phase: 8, cutoff_max: 90, cutoff_min: 40, wave: 0, mix: 0 do
+        with_fx :slicer, phase: 4, wave: 1, pulse_width: 0.875, mix: 0 do
+          bs = synth :dsaw, note: bass[0]-36, note_slide: 0.5, attack: 0, sustain: tb.sum*0.5-0, release: 0
+          bss = synth :fm, note: bass[0]-24, note_slide: 0.5, attack: 0, sustain: tb.sum*0.5-0, release: 0
+          tb.length.times do
+            tick(:ii)
+            control bs, note: bass.look(:ii)-36
+            control bss, note: bass.look(:ii)-24
+            ##| synth :dsaw, note: bass.look(:ii)-24, sustain: tb.ring.look(:ii)*0.5, release: 0
+            sleep tb.ring.look(:ii)*0.5
+          end
+        end
+      end
+    end
+  end
+end
+
+live_loop :highboys do
+  with_fx :slicer, phase: 0.25, wave: 0, mix: 0 do
+    2.times do
+      tick
+      synth :dsaw, note: ring(62,67).look-0, sustain: 32, release: 0, amp: 0.7, cutoff: 95
+    end
+    sleep 32
+  end
+end
+
+live_loop :beat do
+  ##| sample :bd_haus, amp: 5, cutoff: 100
+  ##| sample :bd_boom, amp: 2
+  sleep 1
+end
+
+live_loop :snat do
+  sleep 0.875
+  ##| synth :cnoise, res: 0.8, attack: 0.125, release: 0, amp: [1,0].choose
+  sleep 0.125
+  with_fx :gverb, room: 69, release: 2, mix: 0.2 do
+    ##| synth :cnoise, release: 0.75, amp: 1
+    ##| sample :elec_snare, amp: 0.9
+    sleep 1
+  end
+end
